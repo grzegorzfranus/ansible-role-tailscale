@@ -2,7 +2,7 @@
 
 |Source|Version|Tests|License|
 |------|-------|-------|-------|
-|[![Source Code](https://img.shields.io/badge/source-github-blue.svg)](https://github.com/grzegorzfranus/ansible-role-tailscale)|[![Version](https://img.shields.io/github/v/release/grzegorzfranus/ansible-role-tailscale)](https://github.com/grzegorzfranus/ansible-role-tailscale/releases)|[![tests](https://github.com/grzegorzfranus/ansible-role-tailscale/actions/workflows/ci.yml/badge.svg)](https://github.com/grzegorzfranus/ansible-role-tailscale/actions)|[![Repository License](https://img.shields.io/badge/license-apache2.0-brightgreen.svg)](LICENSE)|
+|[![Source Code](https://img.shields.io/badge/source-github-blue.svg)](https://github.com/grzegorzfranus/ansible-role-tailscale)|[![Version](https://img.shields.io/github/v/release/grzegorzfranus/ansible-role-tailscale)](https://github.com/grzegorzfranus/ansible-role-tailscale/releases)|[![tests](https://github.com/grzegorzfranus/ansible-role-tailscale/actions/workflows/test-and-validation.yml/badge.svg)](https://github.com/grzegorzfranus/ansible-role-tailscale/actions)|[![Repository License](https://img.shields.io/badge/license-apache2.0-brightgreen.svg)](LICENSE)|
 
 This Ansible role installs and configures Tailscale, a modern VPN service that creates secure point-to-point connections between devices. It provides zero-configuration networking with end-to-end encryption, automatic key rotation, and seamless cross-platform connectivity.
 
@@ -329,7 +329,7 @@ sudo apt install tailscale
 ansible-role-tailscale/
 ├── .github/                  # GitHub Actions workflows
 │   └── workflows/           # CI/CD automation
-│       └── ci.yml           # 🧪 Testing and validation workflow
+│       └── test-and-validation.yml # 🧪 Testing and validation workflow
 ├── CHANGELOG.md              # Version history and changes
 ├── LICENSE                   # Apache-2.0 license
 ├── README.md                # This documentation file
