@@ -11,7 +11,7 @@ driver:
 
 platforms:
   - name: instance
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-rockylinux9}-ansible:latest" 
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-rockylinux9}-ansible:latest"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
@@ -23,7 +23,7 @@ provisioner:
   name: ansible
   playbooks:
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
-    verify: ${MOLECULE_PLAYBOOK:-verify.yml} 
+    verify: ${MOLECULE_PLAYBOOK:-verify.yml}
     prepare: ${MOLECULE_PLAYBOOK:-prepare.yml}
   lint:
     name: ansible-lint

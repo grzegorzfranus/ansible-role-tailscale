@@ -28,10 +28,16 @@ tailscale_repo_key_path: "/usr/share/keyrings/tailscale-archive-keyring.gpg"
 
 # Repository URLs with smart track and key method detection
 tailscale_repo_key_url: >-
-  https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_distribution | lower }}/{{- _tailscale_version_codename | default(ansible_distribution_release) }}.{%- if (_tailscale_detected_key_method | default('keyring')) == 'keyring' -%}noarmor.gpg{%- else -%}asc{%- endif -%}
+  https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_distribution | lower }}/{{-
+  _tailscale_version_codename | default(ansible_distribution_release) }}.{%-
+  if (_tailscale_detected_key_method | default('keyring')) == 'keyring' -%}
+  noarmor.gpg{%- else -%} asc{%- endif -%}
 
 tailscale_repo_list_url: >-
-  https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_distribution | lower }}/{{- _tailscale_version_codename | default(ansible_distribution_release) }}.{%- if (_tailscale_detected_key_method | default('keyring')) == 'keyring' -%}tailscale-keyring.list{%- else -%}list{%- endif -%}
+  https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_distribution | lower }}/{{-
+  _tailscale_version_codename | default(ansible_distribution_release) }}.{%-
+  if (_tailscale_detected_key_method | default('keyring')) == 'keyring' -%}
+  tailscale-keyring.list{%- else -%} list{%- endif -%}
 
 # -----------------------------------------------------------------------------
 # 3. Smart Key Management Detection
