@@ -1,0 +1,21 @@
+---
+# =============================================================================
+# Ansible Role: Tailscale - Debian 12 (Bookworm) Variables
+# =============================================================================
+# Variables specific to Debian 12 (Bookworm) for Tailscale installation
+# =============================================================================
+
+# Repository configuration
+tailscale_repo_key_url: "https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg"
+tailscale_repo_key_path: "/usr/share/keyrings/tailscale-archive-keyring.gpg"
+tailscale_repo_list_url: "https://pkgs.tailscale.com/stable/debian/bookworm.tailscale-keyring.list"
+
+# Service configuration
+tailscale_service_name: "tailscaled"
+
+# Required packages
+tailscale_prerequisites:
+  - curl
+  - gnupg
+  - apt-transport-https
+  - ca-certificates

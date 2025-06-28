@@ -1,0 +1,96 @@
+---
+# =============================================================================
+# Ansible Role: Tailscale - Prerequisites Tasks
+# =============================================================================
+# This file handles the installation of prerequisite packages required by Tailscale.
+# It ensures that all necessary dependencies are installed before proceeding with
+# the main Tailscale installation using enhanced validation and error reporting.
+#
+# Flow:
+# 1. Validate Prerequisites List
+# 2. Update Package Cache (if needed)
+# 3. Install Required Packages
+# 4. Verify Installation
+# 5. Error Handling
+#
+# The role uses the generic package module to be compatible with various
+# package managers across different Linux distributions.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1. Validate Prerequisites List
+# -----------------------------------------------------------------------------
+- name: 🔍 Tailscale | prerequisites | Validate prerequisites list
+  ansible.builtin.assert:
+    that:
+      - tailscale_prerequisites is defined
+      - tailscale_prerequisites | length > 0
+    fail_msg: "❌ Prerequisites list is empty or undefined"
+    success_msg: "✅ Prerequisites list validated: {{ tailscale_prerequisites | join(', ') }}"
+
+- name: 📋 Tailscale | prerequisites | Display prerequisites to install
+  ansible.builtin.debug:
+    msg:
+      - "📦 Installing Tailscale Prerequisites:"
+      - "   Packages: {{ tailscale_prerequisites | join(', ') }}"
+      - "   Package Manager: {{ ansible_pkg_mgr }}"
+      - "   Total Count: {{ tailscale_prerequisites | length }}"
+
+# -----------------------------------------------------------------------------
+# 2. Update Package Cache (if needed)
+# -----------------------------------------------------------------------------
+- name: 🔄 Tailscale | prerequisites | Update package cache before installation
+  become: true
+  ansible.builtin.package:
+    update_cache: true
+  register: _tailscale_cache_update_result
+  failed_when: false
+  when: >
+    ansible_pkg_mgr in ['apt', 'yum', 'dnf', 'zypper']
+
+# -----------------------------------------------------------------------------
+# 3. Install Required Packages
+# -----------------------------------------------------------------------------
+- name: 📦 Tailscale | prerequisites | Install required packages
+  become: true
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  loop: "{{ tailscale_prerequisites }}"
+  register: _tailscale_package_install_result
+  until: _tailscale_package_install_result is succeeded
+  retries: 3
+  delay: 5
+
+# -----------------------------------------------------------------------------
+# 4. Verify Installation
+# -----------------------------------------------------------------------------
+- name: 🔍 Tailscale | prerequisites | Verify package installation
+  ansible.builtin.command: "which {{ item }}"
+  register: _tailscale_package_verification
+  failed_when: false
+  changed_when: false
+  loop: "{{ tailscale_prerequisites }}"
+  when: >
+    item in ['curl', 'wget', 'gnupg', 'gpg']
+
+- name: 📊 Tailscale | prerequisites | Report installation status
+  ansible.builtin.debug:
+    msg:
+      - "✅ Prerequisites Installation Completed:"
+      - "   Successfully Installed: {{ tailscale_prerequisites | length }} packages"
+      - "   Package Manager: {{ ansible_pkg_mgr }}"
+      - "   Cache Updated: {{ 'Yes' if _tailscale_cache_update_result is defined and _tailscale_cache_update_result.changed else 'Skipped' }}"
+  when: >
+    tailscale_collect_system_info | bool
+
+# -----------------------------------------------------------------------------
+# 5. Error Handling
+# -----------------------------------------------------------------------------
+- name: 🚨 Tailscale | prerequisites | Handle installation errors
+  ansible.builtin.include_tasks: error_reporting.yml
+  when: >
+    tailscale_enhanced_error_reporting | bool and
+    _tailscale_package_install_result is defined and
+    _tailscale_package_install_result.failed | default(false)

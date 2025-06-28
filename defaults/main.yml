@@ -1,0 +1,116 @@
+---
+# =============================================================================
+# Ansible Role: Tailscale - Default Variables
+# =============================================================================
+# This file defines default configuration values for the Tailscale role.
+# These values can be overridden by setting them in your playbook or inventory.
+#
+# Supported OS distributions:
+# - Ubuntu 24.04 (Noble) and variants
+# - Debian 12 (Bookworm) and variants
+#
+# Sections:
+#   1. Authentication Settings
+#   2. Installation Settings
+#   3. Service Configuration
+#   4. System Validation Settings
+#   5. Error Reporting Configuration
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1. Authentication Settings
+# -----------------------------------------------------------------------------
+# Tailscale network authentication configuration
+
+# Authentication key to connect to the Tailscale network
+# You should set this variable in your playbook or inventory
+# Generate from: https://login.tailscale.com/admin/authkeys
+tailscale_auth_key: ""
+
+# Extra arguments to pass to 'tailscale up' command
+# Examples:
+#  - Set hostname: "--hostname=myserver"
+#  - Advertise as exit node: "--advertise-exit-node"
+#  - Accept subnet routes: "--accept-routes"
+#  - Disable key expiry: "--accept-routes --accept-dns --ssh"
+tailscale_extra_args: ""
+
+# -----------------------------------------------------------------------------
+# 2. Installation Settings
+# -----------------------------------------------------------------------------
+# Release track selection (stable or unstable)
+# stable: Production-ready releases (recommended)
+# unstable: Pre-release versions with latest features
+tailscale_track: "stable"
+
+# Prerequisites packages needed before installing Tailscale
+# Note: Additional OS-specific prerequisites are defined in vars/main.yml
+tailscale_prerequisites:
+  - curl
+  - gnupg
+
+# GPG key management method for apt-based systems
+# auto: Automatically detect based on OS version (recommended)
+# legacy: Use traditional apt-key method (Ubuntu <20.04, Debian <11)
+# keyring: Use modern keyring method (Ubuntu 20.04+, Debian 11+)
+tailscale_apt_key_type: "auto"
+
+# Installation method preference
+# package: Use distribution package manager (recommended)
+# binary: Use static binary installation (future enhancement)
+tailscale_install_method: "package"
+
+# -----------------------------------------------------------------------------
+# 3. Service Configuration
+# -----------------------------------------------------------------------------
+# Control whether the Tailscale service starts automatically on system boot
+# Set to true to enable service at boot, false to disable automatic startup
+tailscale_service_enabled: true
+
+# Service startup behavior for special distributions
+# auto: Automatically detect if immediate start is needed (recommended)
+# true: Always start service immediately after installation
+# false: Never start service immediately (only enable for boot)
+tailscale_systemctl_start: "auto"
+
+# Service management method detection
+# auto: Automatically detect service manager (recommended)
+# systemd: Force systemd usage
+# openrc: Force OpenRC usage (Alpine, Gentoo)
+tailscale_service_manager: "auto"
+
+# -----------------------------------------------------------------------------
+# 4. System Validation Settings
+# -----------------------------------------------------------------------------
+# Enable comprehensive system validation checks
+tailscale_validate_system: true
+
+# Enable network connectivity verification to Tailscale servers
+tailscale_validate_connectivity: true
+
+# Enable architecture and package manager validation
+tailscale_validate_prerequisites: true
+
+# Collect detailed system information for error reporting
+tailscale_collect_system_info: true
+
+# Timeout for network connectivity checks (seconds)
+tailscale_connectivity_timeout: 10
+
+# -----------------------------------------------------------------------------
+# 5. Error Reporting Configuration
+# -----------------------------------------------------------------------------
+# Enable enhanced error reporting with system diagnostics
+tailscale_enhanced_error_reporting: true
+
+# Include system hardware information in error reports
+tailscale_include_hardware_info: true
+
+# Include network configuration in error reports
+tailscale_include_network_info: true
+
+# Include package manager state in error reports
+tailscale_include_package_info: true
+
+# Maximum lines of log output to include in error reports
+tailscale_error_log_lines: 50

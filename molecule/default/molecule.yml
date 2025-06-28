@@ -1,0 +1,62 @@
+---
+role_name_check: 1
+
+dependency:
+  name: galaxy
+  options:
+    ignore-errors: true
+
+driver:
+  name: docker
+
+platforms:
+  - name: ubuntu-2404
+    image: "ubuntu:24.04"
+    command: "/lib/systemd/systemd"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: false
+    dockerfile: ../resources/Dockerfile.ubuntu
+  - name: debian-12
+    image: "debian:12"
+    command: "/lib/systemd/systemd"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: false
+    dockerfile: ../resources/Dockerfile.debian
+
+provisioner:
+  name: ansible
+  playbooks:
+    converge: ${MOLECULE_PLAYBOOK:-converge.yml}
+    verify: ${MOLECULE_PLAYBOOK:-verify.yml}
+    prepare: ${MOLECULE_PLAYBOOK:-prepare.yml}
+  lint:
+    name: ansible-lint
+  config_options:
+    defaults:
+      interpreter_python: auto_silent
+    ssh_connection:
+      pipelining: true
+  env:
+    ANSIBLE_FORCE_COLOR: "true"
+  inventory:
+    group_vars:
+      all:
+        # Skip auth key requirement for testing
+        tailscale_auth_key: ""
+        # Enable enhanced error reporting for tests
+        tailscale_enhanced_error_reporting: true
+        # Collect system info for verification
+        tailscale_collect_system_info: true
+        # Use stable track for testing
+        tailscale_track: "stable"
+
+verifier:
+  name: ansible
+  options:
+    verbose: true

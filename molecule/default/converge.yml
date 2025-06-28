@@ -1,0 +1,53 @@
+---
+# =============================================================================
+# Ansible Role: Tailscale - Molecule Convergence Playbook
+# =============================================================================
+
+- name: Molecule | Converge
+  hosts: all
+
+  pre_tasks:
+    - name: 🔄 Converge | Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 600
+      changed_when: false
+      when: >
+        ansible_os_family == "Debian"
+
+    - name: ⏳ Converge | Wait for systemd to complete initialization
+      ansible.builtin.systemd:
+        name: multi-user.target
+        state: started
+      register: systemctl_status
+      until: true
+      retries: 30
+      delay: 5
+      when: >
+        ansible_service_mgr == 'systemd'
+      changed_when: false
+      failed_when: false
+
+  vars:
+    # Override auth key for testing - skip authentication
+    tailscale_auth_key: ""
+    # Enable enhanced features for testing
+    tailscale_enhanced_error_reporting: true
+    tailscale_collect_system_info: true
+    # Use stable track for testing
+    tailscale_track: "stable"
+    # Configure service but don't require auth
+    tailscale_service_enabled: true
+    # Skip validation that requires external connectivity
+    tailscale_validate_connectivity: false
+
+  roles:
+    - role: ../../..
+
+  post_tasks:
+    - name: 📊 Converge | Display role execution summary
+      ansible.builtin.debug:
+        msg:
+          - "✅ Tailscale role execution completed"
+          - "🔧 Installation: Completed"
+          - "⚙️ Configuration: Applied"

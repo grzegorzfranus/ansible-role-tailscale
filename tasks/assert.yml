@@ -1,0 +1,113 @@
+---
+# =============================================================================
+# Ansible Role: Tailscale - Variable Assertions
+# =============================================================================
+# This file contains assertions to validate all variables used in the role.
+# Each assertion ensures that variables are defined and have correct types/values.
+# These validations help prevent configuration errors and ensure secure defaults.
+#
+# Flow:
+# 1. Repository Configuration Variables Validation
+# 2. Service Configuration Variables Validation
+# 3. Authentication Variables Validation
+# 4. Package Prerequisites Validation
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1. Repository Configuration Variables Validation
+# -----------------------------------------------------------------------------
+- name: 🧪 Tailscale | assert | Validate repository key URL
+  ansible.builtin.assert:
+    that:
+      - tailscale_repo_key_url is defined
+      - tailscale_repo_key_url is string
+      - tailscale_repo_key_url | length > 0
+      - tailscale_repo_key_url is match("^https://.*\.gpg$")
+    fail_msg: "❌ Invalid repository key URL '{{ tailscale_repo_key_url | default('undefined') }}'. Must be a valid HTTPS URL ending with .gpg"
+    success_msg: "✅ Repository key URL is valid: {{ tailscale_repo_key_url }}"
+
+- name: 🧪 Tailscale | assert | Validate repository key path
+  ansible.builtin.assert:
+    that:
+      - tailscale_repo_key_path is defined
+      - tailscale_repo_key_path is string
+      - tailscale_repo_key_path | length > 0
+      - tailscale_repo_key_path is match("^/.*")
+    fail_msg: "❌ Invalid repository key path '{{ tailscale_repo_key_path | default('undefined') }}'. Must be a valid absolute file path"
+    success_msg: "✅ Repository key path is valid: {{ tailscale_repo_key_path }}"
+
+- name: 🧪 Tailscale | assert | Validate repository list URL
+  ansible.builtin.assert:
+    that:
+      - tailscale_repo_list_url is defined
+      - tailscale_repo_list_url is string
+      - tailscale_repo_list_url | length > 0
+      - tailscale_repo_list_url is match("^https://.*\.list$")
+    fail_msg: "❌ Invalid repository list URL '{{ tailscale_repo_list_url | default('undefined') }}'. Must be a valid HTTPS URL ending with .list"
+    success_msg: "✅ Repository list URL is valid: {{ tailscale_repo_list_url }}"
+
+# -----------------------------------------------------------------------------
+# 2. Service Configuration Variables Validation
+# -----------------------------------------------------------------------------
+- name: 🧪 Tailscale | assert | Validate service name
+  ansible.builtin.assert:
+    that:
+      - tailscale_service_name is defined
+      - tailscale_service_name is string
+      - tailscale_service_name | length > 0
+      - tailscale_service_name is match("^[a-zA-Z0-9_-]+$")
+    fail_msg: "❌ Invalid service name '{{ tailscale_service_name | default('undefined') }}'. Must be a non-empty string containing only alphanumeric characters, underscores, and hyphens"
+    success_msg: "✅ Service name is valid: {{ tailscale_service_name }}"
+
+- name: 🧪 Tailscale | assert | Validate service enabled setting
+  ansible.builtin.assert:
+    that:
+      - tailscale_service_enabled is defined
+      - tailscale_service_enabled is boolean
+    fail_msg: "❌ Invalid service enabled setting '{{ tailscale_service_enabled | default('undefined') }}'. Must be boolean (true/false)"
+    success_msg: "✅ Service enabled setting is valid: {{ tailscale_service_enabled }}"
+
+# -----------------------------------------------------------------------------
+# 3. Authentication Variables Validation
+# -----------------------------------------------------------------------------
+- name: 🧪 Tailscale | assert | Validate authentication key type
+  ansible.builtin.assert:
+    that:
+      - tailscale_auth_key is defined
+      - tailscale_auth_key is string
+    fail_msg: "❌ Invalid authentication key '{{ tailscale_auth_key | default('undefined') }}'. Must be defined as a string"
+    success_msg: "✅ Authentication key type is valid: string"
+
+- name: 🧪 Tailscale | assert | Validate extra arguments type
+  ansible.builtin.assert:
+    that:
+      - tailscale_extra_args is defined
+      - tailscale_extra_args is string
+    fail_msg: "❌ Invalid extra arguments '{{ tailscale_extra_args | default('undefined') }}'. Must be defined as a string"
+    success_msg: "✅ Extra arguments type is valid: string"
+
+- name: 🧪 Tailscale | assert | Validate extra arguments content
+  ansible.builtin.assert:
+    that:
+      - tailscale_extra_args is match("^[a-zA-Z0-9=._\\-]*$") or tailscale_extra_args == ""
+    fail_msg: "❌ Invalid extra arguments content '{{ tailscale_extra_args }}'. Must contain only safe characters (alphanumeric, equals, dot, underscore, hyphen) or be empty"
+    success_msg: "✅ Extra arguments content is valid: {{ tailscale_extra_args }}"
+
+# -----------------------------------------------------------------------------
+# 4. Package Prerequisites Validation
+# -----------------------------------------------------------------------------
+- name: 🧪 Tailscale | assert | Validate prerequisites list type
+  ansible.builtin.assert:
+    that:
+      - tailscale_prerequisites is defined
+      - tailscale_prerequisites is sequence
+      - tailscale_prerequisites is iterable
+    fail_msg: "❌ Invalid prerequisites list '{{ tailscale_prerequisites | default('undefined') }}'. Must be a sequence/list"
+    success_msg: "✅ Prerequisites list type is valid: sequence"
+
+- name: 🧪 Tailscale | assert | Validate prerequisites list is not empty
+  ansible.builtin.assert:
+    that:
+      - tailscale_prerequisites | length > 0
+    fail_msg: "❌ Prerequisites list cannot be empty. Must contain at least one package"
+    success_msg: "✅ Prerequisites list contains {{ tailscale_prerequisites | length }} packages"

@@ -1,0 +1,103 @@
+---
+# =============================================================================
+# Ansible Role: Tailscale - Molecule Verification Playbook
+# =============================================================================
+
+- name: Molecule | Verify Role
+  hosts: all
+  gather_facts: true
+
+  vars_files:
+    - ../../defaults/main.yml
+    - ../../vars/main.yml
+
+  tasks:
+    - name: 🔍 Verify | Check if Tailscale package is installed
+      ansible.builtin.command: "dpkg -l tailscale"
+      register: _package_check_
+      failed_when: false
+      changed_when: false
+      when: >
+        ansible_pkg_mgr == 'apt'
+
+    - name: 🧪 Verify | Assert Tailscale package is installed
+      ansible.builtin.assert:
+        that:
+          - _package_check_.rc == 0
+          - "'tailscale' in _package_check_.stdout"
+        fail_msg: "❌ Tailscale package is not installed"
+        success_msg: "✅ Tailscale package installation verified"
+      when: >
+        ansible_pkg_mgr == 'apt'
+
+    - name: 🔍 Verify | Check if Tailscale repository is configured
+      ansible.builtin.find:
+        paths: "/etc/apt/sources.list.d"
+        patterns: "*tailscale*"
+      register: _repo_files_
+      when: >
+        ansible_pkg_mgr == 'apt'
+
+    - name: 🧪 Verify | Assert repository configuration exists
+      ansible.builtin.assert:
+        that:
+          - _repo_files_.files | length > 0
+        fail_msg: "❌ Tailscale repository configuration not found"
+        success_msg: "✅ Tailscale repository configuration verified"
+      when: >
+        ansible_pkg_mgr == 'apt'
+
+    - name: 🔍 Verify | Check if Tailscale client binary exists
+      ansible.builtin.stat:
+        path: "/usr/bin/tailscale"
+      register: _client_binary_
+
+    - name: 🧪 Verify | Assert client binary exists and is executable
+      ansible.builtin.assert:
+        that:
+          - _client_binary_.stat.exists
+          - _client_binary_.stat.executable
+        fail_msg: "❌ Tailscale client binary not found or not executable"
+        success_msg: "✅ Tailscale client binary verified"
+
+    - name: 🔍 Verify | Check if Tailscale daemon binary exists
+      ansible.builtin.stat:
+        path: "/usr/sbin/tailscaled"
+      register: _daemon_binary_
+
+    - name: 🧪 Verify | Assert daemon binary exists and is executable
+      ansible.builtin.assert:
+        that:
+          - _daemon_binary_.stat.exists
+          - _daemon_binary_.stat.executable
+        fail_msg: "❌ Tailscale daemon binary not found or not executable"
+        success_msg: "✅ Tailscale daemon binary verified"
+
+    - name: 🔍 Verify | Test Tailscale client functionality
+      ansible.builtin.command: "/usr/bin/tailscale version"
+      register: _version_check_
+      changed_when: false
+
+    - name: 📊 Verify | Show Tailscale version
+      ansible.builtin.debug:
+        msg: "🎯 Tailscale version: {{ _version_check_.stdout }}"
+
+    - name: 🔍 Verify | Check if Tailscale service file exists
+      ansible.builtin.stat:
+        path: "/lib/systemd/system/tailscaled.service"
+      register: _service_file_
+      when: >
+        ansible_service_mgr == 'systemd'
+
+    - name: 🧪 Verify | Assert service file exists
+      ansible.builtin.assert:
+        that:
+          - _service_file_.stat.exists
+        fail_msg: "❌ Tailscale service file not found"
+        success_msg: "✅ Tailscale service file verified"
+      when: >
+        ansible_service_mgr == 'systemd'
+
+    - name: 📊 Verify | Show comprehensive verification results
+      ansible.builtin.debug:
+        msg: "🎉 All Tailscale verification checks completed successfully!"

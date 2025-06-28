@@ -1,0 +1,21 @@
+---
+# =============================================================================
+# Ansible Role: Tailscale - Ubuntu 24.04 (Noble) Variables
+# =============================================================================
+# Variables specific to Ubuntu 24.04 (Noble) for Tailscale installation
+# =============================================================================
+
+# Repository configuration
+tailscale_repo_key_url: "https://pkgs.tailscale.com/stable/ubuntu/noble.noarmor.gpg"
+tailscale_repo_key_path: "/usr/share/keyrings/tailscale-archive-keyring.gpg"
+tailscale_repo_list_url: "https://pkgs.tailscale.com/stable/ubuntu/noble.tailscale-keyring.list"
+
+# Service configuration
+tailscale_service_name: "tailscaled"
+
+# Required packages
+tailscale_prerequisites:
+  - curl
+  - gnupg
+  - apt-transport-https
+  - ca-certificates

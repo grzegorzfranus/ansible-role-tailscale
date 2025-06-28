@@ -1,0 +1,38 @@
+---
+galaxy_info:
+  role_name: tailscale
+  author: Grzegorz Franus
+  namespace: grzegorzfranus
+  description: >
+    Ansible role for installing and configuring Tailscale VPN with automatic node registration and network authentication.
+  license: Apache-2.0
+  company: EWARE
+  min_ansible_version: "2.15"
+
+  platforms:
+    - name: Debian
+      versions:
+        - "bookworm"
+      galaxy_tags:
+        - debian
+        - debian12
+    - name: Ubuntu
+      versions:
+        - "noble"
+      galaxy_tags:
+        - ubuntu
+        - ubuntu24
+
+  galaxy_tags:
+    - networking
+    - security
+    - vpn
+    - tailscale
+    - mesh
+    - wireguard
+    - zerotier
+    - remote
+    - access
+    - tunnel
+
+dependencies: []
