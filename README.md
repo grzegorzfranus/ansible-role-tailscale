@@ -79,7 +79,7 @@ This role requires root access for package installation and service management. 
   roles:
     - role: grzegorzfranus.tailscale
       vars:
-        tailscale_auth_key: "tskey-auth-YOUR-KEY-HERE"
+        tailscale_auth_key: "YOUR-AUTH-KEY-HERE"
 ```
 
 ### 2. Advanced Configuration with Exit Node
@@ -239,7 +239,7 @@ sudo tailscale status
 sudo tailscale file cp --help
 
 # Re-authenticate if needed
-sudo tailscale up --authkey=tskey-auth-YOUR-NEW-KEY
+sudo tailscale up --authkey=YOUR-NEW-AUTH-KEY
 ```
 
 ## 🛡️ Security Features
@@ -255,7 +255,7 @@ sudo tailscale up --authkey=tskey-auth-YOUR-NEW-KEY
 
 ```yaml
 # Use pre-authorized keys with expiration
-tailscale_auth_key: "tskey-auth-YOUR-PREAUTHKEY-WITH-EXPIRY"
+tailscale_auth_key: "YOUR-PREAUTH-KEY-HERE"
 
 # Restrict network access
 tailscale_extra_args: >-
@@ -290,7 +290,7 @@ sudo systemctl restart tailscaled
 sudo tailscale status
 
 # Re-authenticate with new key
-sudo tailscale up --authkey=tskey-auth-YOUR-NEW-KEY
+sudo tailscale up --authkey=YOUR-NEW-AUTH-KEY
 
 # Check for expired keys
 sudo tailscale status | grep -i expire
