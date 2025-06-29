@@ -5,7 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2025-01-16
+## [1.1.0] - 2025-06-29
+
+### Added ✅
+- 📁 **Optional Dedicated Logging Configuration** - New comprehensive logging system for Tailscale
+  - `tailscale_enable_logging` flag to control separate log files (disabled by default)
+  - Creates `/var/log/tailscale/tailscale.log` for Tailscale-specific logs separated from system syslog
+  - RSyslog integration with automatic service configuration and log filtering
+  - Systemd service override for proper syslog identifier configuration
+  - Advanced logrotate configuration with dictionary structure for easy management
+  - Support for copytruncate, dateext, custom date formats, and archive directories
+  - New `logging` tag for selective task execution
+
+### Changed 🔄
+- **Logrotate Configuration Structure** - Restructured individual variables into organized dictionary
+  - `tailscale_logrotate_options` dictionary replaces 9+ individual variables
+  - Cleaner, more maintainable configuration similar to chrony role pattern
+  - Inline comments for better variable documentation
+  - Removed `maxsize` option for simplified time-based rotation
+  - Made `notifempty` optional with sensible default (enabled)
+
+### Added Files 📁
+- `tasks/logging.yml` - Complete logging configuration tasks
+- `templates/rsyslog/tailscale.conf.j2` - RSyslog integration template
+- `templates/logrotate/tailscale.j2` - Advanced logrotate configuration template
+
+### Updated Documentation 📝
+- Added comprehensive logging configuration section in README.md
+- New "Logrotate Configuration Dictionary" section with all options documented
+- Multiple configuration examples showing logging capabilities
+- Updated file structure documentation to reflect new templates
+- Added `logging` tag to tags documentation
+
+### Quality Assurance ✅
+- All files pass yamllint and ansible-lint production standards
+- Comprehensive testing with 18 files validated
+- Backward compatibility maintained (logging disabled by default)
+- Professional-grade implementation with error handling and status reporting
+
+## [1.0.0] - 2025-06-28
 
 ### Added ✅
 - 🚀 **Initial release** of Ansible role for Tailscale VPN installation and configuration

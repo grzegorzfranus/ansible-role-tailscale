@@ -15,6 +15,7 @@
 #   3. Service Configuration
 #   4. System Validation Settings
 #   5. Error Reporting Configuration
+#   6. Logging Configuration
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -114,3 +115,51 @@ tailscale_include_package_info: true
 
 # Maximum lines of log output to include in error reports
 tailscale_error_log_lines: 50
+
+# -----------------------------------------------------------------------------
+# 6. Logging Configuration
+# -----------------------------------------------------------------------------
+# Centralized logging, rsyslog integration, and log rotation settings
+
+# Enable dedicated logging for Tailscale service
+# Creates separate log files and configures rsyslog integration
+tailscale_enable_logging: false
+
+# Directory for Tailscale log files and archives
+# Must be writable by syslog user for proper log file creation
+tailscale_log_dir: "/var/log/tailscale"
+
+# Main Tailscale log file path
+# Constructed from log directory and standard filename
+tailscale_log_file: "{{ tailscale_log_dir }}/tailscale.log"
+
+# File permissions for log files (readable by system users)
+# Allows log monitoring tools and administrators to read logs
+tailscale_log_file_permissions: "0644"
+
+# Directory permissions for log directory
+# Allows navigation and file creation by appropriate users
+tailscale_log_dir_permissions: "0755"
+
+# Log file ownership (system defaults)
+tailscale_log_user: "syslog"
+tailscale_log_group: "adm"
+
+# Syslog program identifier for filtering
+# Used by rsyslog to route Tailscale messages to dedicated files
+tailscale_syslog_identifier: "tailscaled"
+
+# RSyslog configuration file name
+tailscale_rsyslog_config_file: "49-tailscale.conf"
+
+# Logrotate configuration
+tailscale_logrotate_options:
+  enabled: true                    # Enable logrotate configuration for Tailscale logs
+  frequency: "weekly"              # Log rotation frequency (hourly, daily, weekly, monthly)
+  rotate_count: 4                  # Number of rotated log files to keep
+  compress: true                   # Compress rotated log files using gzip
+  notifempty: true                 # Only rotate if log file is not empty
+  copytruncate: false              # Use copytruncate instead of moving files (useful for busy log files)
+  dateext: true                    # Use date extension for rotated files instead of numbers
+  dateformat: ".%Y-%m-%d"          # Date format for rotated log files (requires dateext)
+  olddir: ""                       # Directory to move old log files to (empty = same directory)

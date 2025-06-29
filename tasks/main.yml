@@ -120,7 +120,18 @@
     - setup
 
 # -----------------------------------------------------------------------------
-# 8. Authentication
+# 8. Logging Configuration (Optional)
+# -----------------------------------------------------------------------------
+- name: 📝 Tailscale | logging | Configure dedicated logging
+  ansible.builtin.include_tasks: logging.yml
+  when: >
+    tailscale_enable_logging | bool
+  tags:
+    - logging
+    - setup
+
+# -----------------------------------------------------------------------------
+# 9. Authentication
 # -----------------------------------------------------------------------------
 - name: 🔑 Tailscale | command | Authenticate with Tailscale network
   become: true

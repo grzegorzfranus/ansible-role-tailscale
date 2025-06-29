@@ -17,6 +17,7 @@ This Ansible role installs and configures Tailscale, a modern VPN service that c
 - 🧪 **Enhanced Error Reporting**: Detailed diagnostics for troubleshooting
 - 🔧 **Flexible Service Control**: Configurable startup behavior and service management
 - 📝 **Advanced Configuration**: Support for exit nodes, subnet routes, and custom hostnames
+- 📁 **Dedicated Logging**: Optional separate log files with rsyslog integration and logrotate
 - 🧪 **Container Testing**: Full Molecule test suite for CI/CD integration
 
 ## 🎯 Architecture
@@ -152,6 +153,42 @@ Customize for specific requirements:
     - role: grzegorzfranus.tailscale
 ```
 
+### Logging Configuration Example
+
+Enable dedicated logging to separate Tailscale logs from system logs:
+
+```yaml
+---
+- name: Tailscale with Dedicated Logging
+  hosts: all
+  become: true
+  vars:
+    # Basic authentication
+    tailscale_auth_key: "{{ vault_tailscale_auth_key }}"
+    
+    # Enable dedicated logging
+    tailscale_enable_logging: true
+    tailscale_log_dir: "/var/log/tailscale"
+    tailscale_log_file: "/var/log/tailscale/tailscale.log"
+    
+    # Customize logrotate settings
+    tailscale_logrotate_options:
+      enabled: true
+      frequency: "daily"
+      rotate_count: 7
+      compress: true
+      notifempty: true
+      copytruncate: true
+      dateext: true
+      dateformat: ".%Y-%m-%d"
+      olddir: "/var/log/tailscale/archive"
+  
+  roles:
+    - role: grzegorzfranus.tailscale
+```
+
+With this configuration, Tailscale logs will be directed to `/var/log/tailscale/tailscale.log` instead of appearing in the system syslog, making monitoring and troubleshooting much easier.
+
 ## 📊 Variables
 
 ### Authentication Settings
@@ -197,6 +234,34 @@ Customize for specific requirements:
 | `tailscale_include_network_info` | Include network configuration in error reports | `true` |
 | `tailscale_include_package_info` | Include package manager state in error reports | `true` |
 | `tailscale_error_log_lines` | Maximum lines of log output to include in error reports | `50` |
+
+### Logging Configuration (Optional)
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `tailscale_enable_logging` | Enable dedicated logging for Tailscale service (creates separate log files and configures rsyslog integration) | `false` |
+| `tailscale_log_dir` | Directory for Tailscale log files and archives | `"/var/log/tailscale"` |
+| `tailscale_log_file` | Main Tailscale log file path | `"{{ tailscale_log_dir }}/tailscale.log"` |
+| `tailscale_log_file_permissions` | File permissions for log files (readable by system users) | `"0644"` |
+| `tailscale_log_dir_permissions` | Directory permissions for log directory | `"0755"` |
+| `tailscale_log_user` | Log file ownership user | `"syslog"` |
+| `tailscale_log_group` | Log file ownership group | `"adm"` |
+| `tailscale_syslog_identifier` | Syslog program identifier for filtering | `"tailscaled"` |
+| `tailscale_rsyslog_config_file` | RSyslog configuration file name | `"49-tailscale.conf"` |
+
+#### Logrotate Configuration Dictionary
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `tailscale_logrotate_options.enabled` | Enable logrotate configuration for Tailscale logs | `true` |
+| `tailscale_logrotate_options.frequency` | Log rotation frequency (hourly, daily, weekly, monthly) | `"weekly"` |
+| `tailscale_logrotate_options.rotate_count` | Number of rotated log files to keep | `4` |
+| `tailscale_logrotate_options.compress` | Compress rotated log files using gzip | `true` |
+| `tailscale_logrotate_options.notifempty` | Only rotate if log file is not empty | `true` |
+| `tailscale_logrotate_options.copytruncate` | Use copytruncate instead of moving files (useful for busy log files) | `false` |
+| `tailscale_logrotate_options.dateext` | Use date extension for rotated files instead of numbers | `true` |
+| `tailscale_logrotate_options.dateformat` | Date format for rotated log files (requires dateext) | `".%Y-%m-%d"` |
+| `tailscale_logrotate_options.olddir` | Directory to move old log files to (empty = same directory) | `""` |
 
 ## 🔍 Verification
 
@@ -353,8 +418,13 @@ ansible-role-tailscale/
 │   ├── repository.yml       # Repository configuration
 │   ├── service.yml          # Service management
 │   ├── validate.yml         # System validation and diagnostics
+│   ├── logging.yml          # Dedicated logging configuration
 │   └── error_reporting.yml  # Enhanced error reporting
-├── templates/               # Configuration templates (currently empty)
+├── templates/               # Configuration templates
+│   ├── rsyslog/            # RSyslog configuration files
+│   │   └── tailscale.conf.j2 # Tailscale rsyslog configuration
+│   └── logrotate/          # Logrotate configuration files
+│       └── tailscale.j2    # Tailscale log rotation settings
 └── vars/
     ├── main.yml             # Internal role variables
     ├── debian_12.yml        # Debian 12 specific variables
@@ -371,6 +441,7 @@ ansible-role-tailscale/
 - `packages` - Tasks related to installing prerequisite packages
 - `repositories` - Repository configuration tasks
 - `service` - Service startup configuration tasks
+- `logging` - Logging configuration tasks
 - `configure` - Tailscale configuration tasks
 - `auth` - Authentication and network joining tasks
 
@@ -449,6 +520,36 @@ ansible-role-tailscale/
       --accept-dns
       --ssh
     tailscale_service_enabled: true
+  
+  roles:
+    - role: grzegorzfranus.tailscale
+
+# Example: Tailscale with Dedicated Logging
+- name: Configure Tailscale with Enhanced Logging
+  hosts: servers
+  become: true
+  vars:
+    tailscale_auth_key: "{{ vault_tailscale_auth_key }}"
+    
+    # Enable dedicated logging
+    tailscale_enable_logging: true
+    tailscale_log_dir: "/var/log/tailscale"
+    
+    # Logrotate configuration
+    tailscale_logrotate_options:
+      enabled: true
+      frequency: "daily"
+      rotate_count: 30
+      compress: true
+      copytruncate: true
+      dateext: true
+      dateformat: ".%Y-%m-%d"
+    
+    # Enhanced configuration
+    tailscale_extra_args: >-
+      --hostname={{ inventory_hostname }}-server
+      --accept-routes
+      --accept-dns
   
   roles:
     - role: grzegorzfranus.tailscale

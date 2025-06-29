@@ -4,7 +4,9 @@ galaxy_info:
   author: Grzegorz Franus
   namespace: grzegorzfranus
   description: >
-    Ansible role for installing and configuring Tailscale VPN with automatic node registration and network authentication.
+    Ansible role for installing and configuring Tailscale VPN with automatic node registration,
+    network authentication, and optional dedicated logging. Features smart repository management,
+    comprehensive validation, and professional-grade error reporting.
   license: Apache-2.0
   company: EWARE
   min_ansible_version: "2.15"
@@ -34,5 +36,7 @@ galaxy_info:
     - remote
     - access
     - tunnel
+    - logging
+    - monitoring
 
 dependencies: []

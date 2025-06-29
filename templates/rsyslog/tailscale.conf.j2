@@ -1,0 +1,23 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+{{ ansible_managed | comment }}
+
+# =============================================================================
+# Tailscale RSyslog Configuration
+# =============================================================================
+# This configuration file sets up specialized logging for Tailscale service.
+# It configures rsyslog to:
+#
+# 1. Capture all log messages from the tailscaled program
+# 2. Redirect them to a dedicated log file for easier monitoring and analysis
+# 3. Stop processing these messages to avoid duplicate logging in syslog
+#
+# The 'stop' directive prevents further processing, so Tailscale logs won't 
+# appear in the main system log file, reducing clutter.
+# =============================================================================
+
+# Redirect Tailscale logs to dedicated file
+# Match logs by program name and redirect to the specified log file
+:programname, isequal, "{{ tailscale_syslog_identifier }}" {{ tailscale_log_file }}
+
+# Stop processing these logs further to prevent duplication
+& stop

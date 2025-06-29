@@ -1,0 +1,46 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+{{ ansible_managed | comment }}
+
+# =============================================================================
+# Tailscale Logrotate Configuration
+# =============================================================================
+# This configuration manages automatic rotation of Tailscale log files
+# to prevent them from consuming excessive disk space while maintaining
+# sufficient historical data for troubleshooting and monitoring.
+#
+# Features:
+# - Automatic rotation based on time
+# - Compression of older log files to save space
+# - Proper permission and ownership management
+# - Signal handling to ensure continuous logging
+# =============================================================================
+
+{{ tailscale_log_file }} {
+    {{ tailscale_logrotate_options.frequency }}
+    rotate {{ tailscale_logrotate_options.rotate_count }}
+    {% if tailscale_logrotate_options.compress %}
+    compress
+    delaycompress
+    {% endif %}
+    {% if tailscale_logrotate_options.copytruncate %}
+    copytruncate
+    {% endif %}
+    {% if tailscale_logrotate_options.dateext %}
+    dateext
+    {% if tailscale_logrotate_options.dateformat %}
+    dateformat {{ tailscale_logrotate_options.dateformat }}
+    {% endif %}
+    {% endif %}
+    {% if tailscale_logrotate_options.olddir %}
+    olddir {{ tailscale_logrotate_options.olddir }}
+    {% endif %}
+    create {{ tailscale_log_file_permissions }} {{ tailscale_log_user }} {{ tailscale_log_group }}
+    missingok
+    {% if tailscale_logrotate_options.notifempty %}
+    notifempty
+    {% endif %}
+    sharedscripts
+    postrotate
+        /bin/systemctl reload rsyslog.service > /dev/null 2>&1 || true
+    endscript
+}
