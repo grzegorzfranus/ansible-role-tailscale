@@ -181,7 +181,7 @@ Enable dedicated logging to separate Tailscale logs from system logs:
       copytruncate: true
       dateext: true
       dateformat: ".%Y-%m-%d"
-      olddir: "/var/log/tailscale/archive"
+      olddir: "/var/log/tailscale/archive"  # Automatically created if specified
   
   roles:
     - role: grzegorzfranus.tailscale
@@ -261,7 +261,7 @@ With this configuration, Tailscale logs will be directed to `/var/log/tailscale/
 | `tailscale_logrotate_options.copytruncate` | Use copytruncate instead of moving files (useful for busy log files) | `false` |
 | `tailscale_logrotate_options.dateext` | Use date extension for rotated files instead of numbers | `true` |
 | `tailscale_logrotate_options.dateformat` | Date format for rotated log files (requires dateext) | `".%Y-%m-%d"` |
-| `tailscale_logrotate_options.olddir` | Directory to move old log files to (empty = same directory) | `""` |
+| `tailscale_logrotate_options.olddir` | Directory to move old log files to (automatically created if specified, empty = same directory) | `""` |
 
 ## 🔍 Verification
 

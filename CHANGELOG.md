@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Systemd service override for proper syslog identifier configuration
   - Advanced logrotate configuration with dictionary structure for easy management
   - Support for copytruncate, dateext, custom date formats, and archive directories
+  - Automatic creation of logrotate archive directories when olddir is specified
   - New `logging` tag for selective task execution
 
 ### Changed 🔄
@@ -42,6 +43,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive testing with 18 files validated
 - Backward compatibility maintained (logging disabled by default)
 - Professional-grade implementation with error handling and status reporting
+
+### Technical Improvements 🛠️
+- **RSyslog Integration**: Automatic service configuration and log filtering
+- **Systemd Override**: Proper syslog identifier for clean log separation  
+- **Dictionary Structure**: Organized `tailscale_logrotate_options` replacing 9+ individual variables
+- **Directory Management**: Automatic creation of logrotate olddir with proper permissions
+- **Professional Templates**: Production-ready rsyslog and logrotate configurations
 
 ## [1.0.0] - 2025-06-28
 

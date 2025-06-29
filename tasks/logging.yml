@@ -110,6 +110,18 @@
   when: >
     tailscale_logrotate_options.enabled | bool
 
+- name: 📁 Tailscale | logging | Create logrotate olddir directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ tailscale_logrotate_options.olddir }}"
+    state: directory
+    mode: "{{ tailscale_log_dir_permissions }}"
+    owner: "{{ tailscale_log_user }}"
+    group: "{{ tailscale_log_group }}"
+  when: >
+    tailscale_logrotate_options.enabled | bool and
+    tailscale_logrotate_options.olddir | length > 0
+
 - name: 🔧 Tailscale | logging | Configure logrotate for Tailscale
   become: true
   ansible.builtin.template:
@@ -137,5 +149,6 @@
       - "   RSyslog Config: /etc/rsyslog.d/{{ tailscale_rsyslog_config_file }}"
       - "   Logrotate: {{ 'Enabled' if tailscale_logrotate_options.enabled else 'Disabled' }}"
       - "   Rotation: {{ tailscale_logrotate_options.frequency }} (keep {{ tailscale_logrotate_options.rotate_count }})"
+      - "   Archive Directory: {{ tailscale_logrotate_options.olddir if tailscale_logrotate_options.olddir else 'Same directory' }}"
   when: >
     tailscale_collect_system_info | bool
