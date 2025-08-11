@@ -12,7 +12,8 @@
     state: stopped
     enabled: false
     daemon_reload: true
-  when: ansible_service_mgr == 'systemd'
+  when: >
+    ansible_service_mgr == 'systemd'
 
 - name: 🗑️ Tailscale | remove | Remove apt repository
   become: true
@@ -44,19 +45,20 @@
   ansible.builtin.file:
     path: "/etc/systemd/system/{{ tailscale_service_name }}.service.d/logging.conf"
     state: absent
-  when: ansible_service_mgr == 'systemd'
+  when: >
+    ansible_service_mgr == 'systemd'
 
 - name: 🔄 Tailscale | remove | Reload systemd if needed
   become: true
   ansible.builtin.systemd:
     daemon_reload: true
-  when: ansible_service_mgr == 'systemd'
+  when: >
+    ansible_service_mgr == 'systemd'
 
 - name: 🧼 Tailscale | remove | Optionally remove log directory
   become: true
   ansible.builtin.file:
     path: "{{ tailscale_log_dir }}"
     state: absent
-  when: tailscale_enable_logging | bool
-
-
+  when: >
+    tailscale_enable_logging | bool

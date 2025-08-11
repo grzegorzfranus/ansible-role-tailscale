@@ -24,7 +24,8 @@
       ansible.builtin.stat:
         path: "/etc/systemd/system/{{ hostvars[inventory_hostname]['tailscale_service_name'] | default('tailscaled') }}.service.d/logging.conf"
       register: _override_
-      when: ansible_service_mgr == 'systemd'
+      when: >
+        ansible_service_mgr == 'systemd'
 
     - name: 🧪 Verify | Assert systemd override present
       ansible.builtin.assert:
@@ -32,7 +33,8 @@
           - _override_.stat.exists
         fail_msg: "❌ Systemd logging override not found"
         success_msg: "✅ Systemd logging override present"
-      when: ansible_service_mgr == 'systemd'
+      when: >
+        ansible_service_mgr == 'systemd'
 
     - name: 🔍 Verify | Check logrotate config exists
       ansible.builtin.stat:

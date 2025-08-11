@@ -13,7 +13,8 @@
       register: _pkg_
       failed_when: false
       changed_when: false
-      when: ansible_pkg_mgr == 'apt'
+      when: >
+        ansible_pkg_mgr == 'apt'
 
     - name: 🧪 Verify | Assert package not present
       ansible.builtin.assert:
@@ -21,14 +22,16 @@
           - _pkg_.rc != 0 or ('no packages found' in (_pkg_.stderr | lower))
         success_msg: "✅ Tailscale package absent"
         fail_msg: "❌ Tailscale package still present"
-      when: ansible_pkg_mgr == 'apt'
+      when: >
+        ansible_pkg_mgr == 'apt'
 
     - name: 🔍 Verify | Check repo file removed
       ansible.builtin.find:
         paths: "/etc/apt/sources.list.d"
         patterns: "*tailscale*"
       register: _repo_
-      when: ansible_pkg_mgr == 'apt'
+      when: >
+        ansible_pkg_mgr == 'apt'
 
     - name: 🧪 Verify | Assert repo removed
       ansible.builtin.assert:
@@ -36,6 +39,7 @@
           - (_repo_.files | length) == 0
         success_msg: "✅ Repository removed"
         fail_msg: "❌ Repository still present"
-      when: ansible_pkg_mgr == 'apt'
+      when: >
+        ansible_pkg_mgr == 'apt'
 
 
