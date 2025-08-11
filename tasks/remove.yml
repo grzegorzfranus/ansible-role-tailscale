@@ -1,0 +1,62 @@
+---
+# =============================================================================
+# Ansible Role: Tailscale - Removal Tasks
+# =============================================================================
+# Uninstalls Tailscale, removes repository and optional logging configuration.
+# =============================================================================
+
+- name: 🛑 Tailscale | remove | Stop and disable service (systemd)
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ tailscale_service_name }}"
+    state: stopped
+    enabled: false
+    daemon_reload: true
+  when: ansible_service_mgr == 'systemd'
+
+- name: 🗑️ Tailscale | remove | Remove apt repository
+  become: true
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by={{ tailscale_repo_key_path }}] https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_distribution | lower }} {{ _tailscale_version_codename }} main"
+    filename: tailscale
+    state: absent
+
+- name: 🧹 Tailscale | remove | Remove repository key
+  become: true
+  ansible.builtin.file:
+    path: "{{ tailscale_repo_key_path }}"
+    state: absent
+
+- name: 🧹 Tailscale | remove | Remove package
+  become: true
+  ansible.builtin.package:
+    name: tailscale
+    state: absent
+
+- name: 🧹 Tailscale | remove | Remove logging configuration (rsyslog)
+  become: true
+  ansible.builtin.file:
+    path: "/etc/rsyslog.d/{{ tailscale_rsyslog_config_file }}"
+    state: absent
+
+- name: 🧹 Tailscale | remove | Remove systemd logging override
+  become: true
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ tailscale_service_name }}.service.d/logging.conf"
+    state: absent
+  when: ansible_service_mgr == 'systemd'
+
+- name: 🔄 Tailscale | remove | Reload systemd if needed
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: ansible_service_mgr == 'systemd'
+
+- name: 🧼 Tailscale | remove | Optionally remove log directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ tailscale_log_dir }}"
+    state: absent
+  when: tailscale_enable_logging | bool
+
+

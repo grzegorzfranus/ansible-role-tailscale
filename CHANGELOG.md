@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-08-11
+
+### Changed 🔄
+- 🔐 Secure authentication task: added `no_log: true` and safe quoting for `--authkey` to prevent secrets exposure in logs
+- 📦 Optimized prerequisites installation by installing the whole list in a single package task
+ - 🧹 Pruned legacy `apt-key` and OpenRC paths; enforced keyring + systemd only
+ - 📦 Switched repository management to `apt_repository` with `signed-by`
+ - ✅ Strengthened validation: choices for track/service manager, numeric ranges
+ - 🧪 Improved check-mode behavior (skip mutations, keep info)
+ - 🧩 Converted systemd override to managed template `templates/systemd/logging.conf.j2`
+ - 🧼 Added uninstall support via `tailscale_state: absent`
+ - 🌐 Added timeouts/retries for network operations
+
+### Documentation 📝
+- Updated supported OS matrix in `README.md` to reflect current support (Ubuntu 24.04, Debian 12)
+- Added sections: Security considerations, Check mode behavior, Tags usage, Network resilience, Uninstall and Repository management
+
 ## [1.1.0] - 2025-06-29
 
 ### Added ✅

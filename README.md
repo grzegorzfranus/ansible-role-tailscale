@@ -46,13 +46,11 @@ Device A ←→ Device B ←→ Device C
 - **Account**: Active Tailscale account with auth keys
 
 ### Supported operating systems
-List of officially supported operating systems:
+List of officially supported operating systems for this role:
 | OS Family | Version | Status |
 |-----------|---------|---------|
 | Ubuntu | 24.04 (Noble) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
-| Ubuntu | 22.04 (Jammy) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Debian | 12 (Bookworm) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
-| Debian | 11 (Bullseye) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 
 ### Ansible version
 
@@ -204,7 +202,7 @@ With this configuration, Tailscale logs will be directed to `/var/log/tailscale/
 |----------|-------------|---------|
 | `tailscale_track` | Release track selection: `stable` (production-ready) or `unstable` (pre-release with latest features) | `"stable"` |
 | `tailscale_prerequisites` | List of prerequisite packages needed before installing Tailscale | `["curl", "gnupg"]` |
-| `tailscale_apt_key_type` | GPG key management method: `auto` (detect based on OS), `legacy` (apt-key), `keyring` (modern method) | `"auto"` |
+| `tailscale_apt_key_type` | GPG key management method. This role uses the modern keyring method; legacy `apt-key` is not supported. | `"auto"` |
 | `tailscale_install_method` | Installation method preference: `package` (recommended) or `binary` (future enhancement) | `"package"` |
 
 ### Service Configuration
@@ -213,7 +211,7 @@ With this configuration, Tailscale logs will be directed to `/var/log/tailscale/
 |----------|-------------|---------|
 | `tailscale_service_enabled` | Whether the Tailscale service starts automatically on system boot | `true` |
 | `tailscale_systemctl_start` | Service startup behavior: `auto` (detect if immediate start needed), `true` (always start), `false` (never start immediately) | `"auto"` |
-| `tailscale_service_manager` | Service manager detection: `auto` (detect), `systemd` (force systemd), `openrc` (force OpenRC) | `"auto"` |
+| `tailscale_service_manager` | Service manager detection: `auto` (detect) or `systemd` (force systemd). OpenRC is not supported by this role. | `"auto"` |
 
 ### System Validation Settings
 
@@ -333,6 +331,46 @@ tailscale_validate_system: true
 tailscale_validate_connectivity: true
 ```
 
+### Uninstall
+
+To remove Tailscale and its repository/configuration from a host:
+
+```yaml
+---
+- name: Uninstall Tailscale
+  hosts: all
+  become: true
+  roles:
+    - role: grzegorzfranus.tailscale
+      vars:
+        tailscale_state: absent
+```
+
+## 🔒 Security considerations
+
+- Use Ansible Vault for `tailscale_auth_key` and any secrets.
+- Secrets masking: the role masks `--authkey` in `tailscale_extra_args` within error reports.
+- The `tailscale up` task uses `no_log: true` to prevent secret leakage.
+
+## 🧪 Check mode behavior
+
+- Most informational tasks run in check mode.
+- Mutating commands (auth, apt cache updates) are skipped in check mode where appropriate.
+- Authentication is idempotent and skipped if the node is already authenticated.
+
+## 🏷️ Tags usage
+
+- Use `--tags` to run selective parts: `validate`, `repositories`, `install`, `service`, `logging`, `auth`.
+
+## 🌐 Network resilience
+
+- Network operations use timeouts and retries. Consider setting HTTP proxy env vars if needed.
+
+## 🧰 Repository management
+
+- Debian-family systems are configured via `apt_repository` with `signed-by` pointing to `{{ tailscale_repo_key_path }}`.
+- The role uses the modern keyring method exclusively (no legacy `apt-key`).
+
 ## 🔧 Troubleshooting
 
 ### Service Issues
@@ -378,10 +416,10 @@ ip route show | grep tailscale
 
 ```bash
 # Verify repository configuration
-cat /etc/apt/sources.list.d/tailscale.list
+grep -R "pkgs.tailscale.com" /etc/apt/sources.list.d/
 
-# Check GPG key
-apt-key list | grep -i tailscale
+# Check signed-by key file (keyring method)
+ls -l /usr/share/keyrings/tailscale-archive-keyring.gpg
 
 # Manual package refresh
 sudo apt update

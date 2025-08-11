@@ -62,6 +62,12 @@ tailscale_apt_key_type: "auto"
 tailscale_install_method: "package"
 
 # -----------------------------------------------------------------------------
+# 3. Service State (Lifecycle)
+# -----------------------------------------------------------------------------
+# Control overall role behavior: install or uninstall
+tailscale_state: "present"
+
+# -----------------------------------------------------------------------------
 # 3. Service Configuration
 # -----------------------------------------------------------------------------
 # Control whether the Tailscale service starts automatically on system boot

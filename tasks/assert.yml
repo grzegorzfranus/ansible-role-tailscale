@@ -68,6 +68,37 @@
     success_msg: "✅ Service enabled setting is valid: {{ tailscale_service_enabled }}"
 
 # -----------------------------------------------------------------------------
+# 3.1. Choice validations and numeric ranges
+# -----------------------------------------------------------------------------
+- name: 🧪 Tailscale | assert | Validate track choice
+  ansible.builtin.assert:
+    that:
+      - tailscale_track in ['stable', 'unstable']
+    fail_msg: "❌ Invalid tailscale_track '{{ tailscale_track }}'. Allowed: stable, unstable"
+    success_msg: "✅ Track is valid: {{ tailscale_track }}"
+
+- name: 🧪 Tailscale | assert | Validate service manager choice
+  ansible.builtin.assert:
+    that:
+      - tailscale_service_manager in ['auto', 'systemd']
+    fail_msg: "❌ Invalid tailscale_service_manager '{{ tailscale_service_manager }}'. Allowed: auto, systemd"
+    success_msg: "✅ Service manager is valid: {{ tailscale_service_manager }}"
+
+- name: 🧪 Tailscale | assert | Validate connectivity timeout
+  ansible.builtin.assert:
+    that:
+      - (tailscale_connectivity_timeout | int) > 0
+    fail_msg: "❌ tailscale_connectivity_timeout must be > 0"
+    success_msg: "✅ Connectivity timeout is valid: {{ tailscale_connectivity_timeout }}"
+
+- name: 🧪 Tailscale | assert | Validate error log lines
+  ansible.builtin.assert:
+    that:
+      - (tailscale_error_log_lines | int) >= 0
+    fail_msg: "❌ tailscale_error_log_lines must be >= 0"
+    success_msg: "✅ Error log lines is valid: {{ tailscale_error_log_lines }}"
+
+# -----------------------------------------------------------------------------
 # 3. Authentication Variables Validation
 # -----------------------------------------------------------------------------
 - name: 🧪 Tailscale | assert | Validate authentication key type

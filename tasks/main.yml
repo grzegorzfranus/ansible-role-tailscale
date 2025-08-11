@@ -57,6 +57,18 @@
     - init
 
 # -----------------------------------------------------------------------------
+# 1.6. Handle uninstall state early (no further tasks executed)
+# -----------------------------------------------------------------------------
+- name: 🧹 Tailscale | state | Handle absent state
+  ansible.builtin.include_tasks: remove.yml
+  when: tailscale_state | lower == 'absent'
+  tags:
+    - always
+    - init
+    - configure
+    - install
+
+# -----------------------------------------------------------------------------
 # 2. Validate Role Variables
 # -----------------------------------------------------------------------------
 - name: ✅ Tailscale | assert | Validate all role variables
@@ -131,18 +143,29 @@
     - setup
 
 # -----------------------------------------------------------------------------
+# 8.5. Check Authentication Status (Idempotent auth)
+# -----------------------------------------------------------------------------
+- name: 🔍 Tailscale | auth | Check current authentication status
+  ansible.builtin.command: tailscale status
+  register: _tailscale_auth_status
+  failed_when: false
+  changed_when: false
+
+# -----------------------------------------------------------------------------
 # 9. Authentication
 # -----------------------------------------------------------------------------
 - name: 🔑 Tailscale | command | Authenticate with Tailscale network
   become: true
+  no_log: true
   ansible.builtin.command: >
-    tailscale up --authkey {{ tailscale_auth_key }} {{ tailscale_extra_args }}
+    tailscale up --authkey={{ tailscale_auth_key | quote }} {{ tailscale_extra_args }}
   register: tailscale_up_result
   changed_when: "'Success' in tailscale_up_result.stdout"
   failed_when: tailscale_up_result.rc != 0 and "already authenticated" not in tailscale_up_result.stderr
   when: >
-    tailscale_auth_key is defined and
-    tailscale_auth_key | length > 0
+    (tailscale_auth_key is defined and tailscale_auth_key | length > 0) and
+    (not ansible_check_mode) and
+    (_tailscale_auth_status.rc is not defined or _tailscale_auth_status.rc != 0)
   tags:
     - configure
     - auth

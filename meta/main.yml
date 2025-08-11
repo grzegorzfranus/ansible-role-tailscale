@@ -15,15 +15,9 @@ galaxy_info:
     - name: Debian
       versions:
         - "bookworm"
-      galaxy_tags:
-        - debian
-        - debian12
     - name: Ubuntu
       versions:
         - "noble"
-      galaxy_tags:
-        - ubuntu
-        - ubuntu24
 
   galaxy_tags:
     - networking

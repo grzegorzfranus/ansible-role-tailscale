@@ -210,7 +210,7 @@
         service_enabled: "{{ tailscale_service_enabled }}"
         systemctl_start: "{{ tailscale_systemctl_start }}"
         auth_key_provided: "{{ 'yes' if tailscale_auth_key | length > 0 else 'no' }}"
-        extra_args: "{{ tailscale_extra_args }}"
+        extra_args: "{{ (tailscale_extra_args | regex_replace('--authkey[= ]\\S+', '--authkey=****')) if (tailscale_extra_args | length > 0) else '' }}"
 
       # Repository Information
       repository:

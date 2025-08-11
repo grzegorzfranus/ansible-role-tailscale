@@ -38,47 +38,8 @@
     group: root
 
 # -----------------------------------------------------------------------------
-# 2. Smart GPG Key Management (Legacy vs Keyring)
+# 2. Key Management (Keyring Only)
 # -----------------------------------------------------------------------------
-- name: 🔍 Tailscale | repository | Check if gnupg is needed for legacy method
-  ansible.builtin.package:
-    name: gnupg
-    state: present
-  become: true
-  when: >
-    _tailscale_detected_key_method == 'legacy' and
-    'gnupg' not in ansible_facts.packages | default({})
-
-- name: 🔑 Tailscale | repository | Add repository key (Legacy Method)
-  become: true
-  ansible.builtin.get_url:
-    url: "{{ tailscale_repo_key_url }}"
-    dest: "/tmp/tailscale-key.asc"
-    mode: '0644'
-  register: _tailscale_legacy_key_download
-  when: >
-    _tailscale_detected_key_method == 'legacy'
-
-- name: 🔑 Tailscale | repository | Install downloaded key (Legacy Method)
-  become: true
-  ansible.builtin.shell: |
-    set -o pipefail
-    apt-key add /tmp/tailscale-key.asc
-  args:
-    executable: /bin/bash
-  register: _tailscale_legacy_key_result
-  changed_when: "'OK' in _tailscale_legacy_key_result.stdout"
-  when: >
-    _tailscale_detected_key_method == 'legacy'
-
-- name: 🧹 Tailscale | repository | Clean up temporary key file
-  become: true
-  ansible.builtin.file:
-    path: "/tmp/tailscale-key.asc"
-    state: absent
-  when: >
-    _tailscale_detected_key_method == 'legacy'
-
 - name: 🔑 Tailscale | repository | Add repository key (Keyring Method)
   become: true
   ansible.builtin.get_url:
@@ -87,60 +48,26 @@
     mode: '0644'
     owner: root
     group: root
-  when: >
-    _tailscale_detected_key_method == 'keyring'
+  timeout: "{{ tailscale_connectivity_timeout }}"
+  retries: 3
+  delay: 5
+  register: _tailscale_key_download
+  until: _tailscale_key_download is succeeded
 
 # -----------------------------------------------------------------------------
-# 3. Fetch Repository Configuration
+# 3. Configure APT Repository
 # -----------------------------------------------------------------------------
-- name: 🔍 Tailscale | repository | Fetch repository list file content
-  ansible.builtin.uri:
-    url: "{{ tailscale_repo_list_url }}"
-    return_content: true
-    timeout: "{{ tailscale_connectivity_timeout }}"
-  register: repo_list_content
-  when: >
-    (ansible_distribution == 'Ubuntu' and ansible_distribution_version == '24.04') or
-    (ansible_distribution == 'Debian' and ansible_distribution_major_version == '12')
-
-- name: 🔍 Tailscale | repository | Extract deb line from repository list
-  ansible.builtin.set_fact:
-    tailscale_repo_line: "{{ repo_list_content.content | regex_search('deb .+') }}"
-  when: >
-    ((ansible_distribution == 'Ubuntu' and ansible_distribution_version == '24.04') or
-     (ansible_distribution == 'Debian' and ansible_distribution_major_version == '12')) and
-    repo_list_content is defined and repo_list_content.content is defined
-
-# -----------------------------------------------------------------------------
-# 4. Configure Repository Sources
-# -----------------------------------------------------------------------------
-- name: 🔧 Tailscale | repository | Add repository from fetched content (Legacy)
+- name: 🔧 Tailscale | repository | Configure apt repository
   become: true
-  ansible.builtin.copy:
-    content: "{{ repo_list_content.content }}"
-    dest: "/etc/apt/sources.list.d/tailscale.list"
-    mode: '0644'
-    owner: root
-    group: root
-  when: >
-    ((ansible_distribution == 'Ubuntu' and ansible_distribution_version == '24.04') or
-     (ansible_distribution == 'Debian' and ansible_distribution_major_version == '12')) and
-    _tailscale_detected_key_method == 'legacy' and
-    tailscale_repo_line is defined and tailscale_repo_line != ''
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by={{ tailscale_repo_key_path }}] https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_distribution | lower }} {{ _tailscale_version_codename }} main"
+    filename: tailscale
+    state: present
+  register: _tailscale_repo_added
 
-- name: 🔧 Tailscale | repository | Add repository from fetched content (Keyring)
-  become: true
-  ansible.builtin.copy:
-    content: "{{ repo_list_content.content }}"
-    dest: "/etc/apt/sources.list.d/tailscale.list"
-    mode: '0644'
-    owner: root
-    group: root
-  when: >
-    ((ansible_distribution == 'Ubuntu' and ansible_distribution_version == '24.04') or
-     (ansible_distribution == 'Debian' and ansible_distribution_major_version == '12')) and
-    _tailscale_detected_key_method == 'keyring' and
-    tailscale_repo_line is defined and tailscale_repo_line != ''
+# -----------------------------------------------------------------------------
+# 4. Update Package Cache
+# -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
 # 5. Update Package Cache
@@ -154,6 +81,7 @@
   retries: 3
   delay: 5
   until: _tailscale_cache_update is succeeded
+  when: not ansible_check_mode
 
 # -----------------------------------------------------------------------------
 # 6. Verification

@@ -81,18 +81,13 @@
 
 - name: 🔧 Tailscale | logging | Configure systemd service override for logging
   become: true
-  ansible.builtin.blockinfile:
-    path: "/etc/systemd/system/{{ tailscale_service_name }}.service.d/logging.conf"
-    create: yes
+  ansible.builtin.template:
+    src: systemd/logging.conf.j2
+    dest: "/etc/systemd/system/{{ tailscale_service_name }}.service.d/logging.conf"
     mode: '0644'
     owner: root
     group: root
-    block: |
-      [Service]
-      StandardOutput=syslog
-      StandardError=syslog
-      SyslogIdentifier={{ tailscale_syslog_identifier }}
-    marker: "# {mark} ANSIBLE MANAGED BLOCK - Tailscale Logging Configuration"
+    backup: true
   notify:
     - 🔄 Tailscale | handlers | Reload systemd
     - 🔄 Tailscale | handlers | Restart Tailscale service

@@ -1,0 +1,49 @@
+---
+# =============================================================================
+# Ansible Role: Tailscale - Molecule Verification (Logging Scenario)
+# =============================================================================
+
+- name: Molecule | Verify (logging)
+  hosts: all
+  gather_facts: true
+
+  tasks:
+    - name: 🔍 Verify | Check rsyslog config file exists
+      ansible.builtin.stat:
+        path: "/etc/rsyslog.d/{{ hostvars[inventory_hostname]['tailscale_rsyslog_config_file'] | default('49-tailscale.conf') }}"
+      register: _rsyslog_
+
+    - name: 🧪 Verify | Assert rsyslog config present
+      ansible.builtin.assert:
+        that:
+          - _rsyslog_.stat.exists
+        fail_msg: "❌ RSyslog configuration for Tailscale not found"
+        success_msg: "✅ RSyslog configuration present"
+
+    - name: 🔍 Verify | Check systemd override exists
+      ansible.builtin.stat:
+        path: "/etc/systemd/system/{{ hostvars[inventory_hostname]['tailscale_service_name'] | default('tailscaled') }}.service.d/logging.conf"
+      register: _override_
+      when: ansible_service_mgr == 'systemd'
+
+    - name: 🧪 Verify | Assert systemd override present
+      ansible.builtin.assert:
+        that:
+          - _override_.stat.exists
+        fail_msg: "❌ Systemd logging override not found"
+        success_msg: "✅ Systemd logging override present"
+      when: ansible_service_mgr == 'systemd'
+
+    - name: 🔍 Verify | Check logrotate config exists
+      ansible.builtin.stat:
+        path: "/etc/logrotate.d/tailscale"
+      register: _logrotate_
+
+    - name: 🧪 Verify | Assert logrotate present
+      ansible.builtin.assert:
+        that:
+          - _logrotate_.stat.exists
+        fail_msg: "❌ Logrotate configuration for Tailscale not found"
+        success_msg: "✅ Logrotate configuration present"
+
+

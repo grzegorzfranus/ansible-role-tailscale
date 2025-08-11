@@ -1,0 +1,33 @@
+---
+# =============================================================================
+# Ansible Role: Tailscale - Molecule Convergence (Logging Scenario)
+# =============================================================================
+
+- name: Molecule | Converge (logging)
+  hosts: all
+
+  pre_tasks:
+    - name: 🔄 Converge | Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 600
+      changed_when: false
+      when: >
+        ansible_os_family == "Debian"
+
+  vars:
+    tailscale_auth_key: ""
+    tailscale_enable_logging: true
+    tailscale_validate_connectivity: false
+    tailscale_track: "stable"
+
+  roles:
+    - role: ../../..
+
+  post_tasks:
+    - name: 📊 Converge | Show logging config summary
+      ansible.builtin.debug:
+        msg:
+          - "Logging enabled scenario converged"
+
+

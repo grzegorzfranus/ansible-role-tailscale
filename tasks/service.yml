@@ -72,28 +72,9 @@
     tailscale_service_enabled | bool
 
 # -----------------------------------------------------------------------------
-# 4. Alternative Service Managers (OpenRC, SysV)
+# 4. Alternative Service Managers
 # -----------------------------------------------------------------------------
-- name: 🔧 Tailscale | service | Configure service startup (OpenRC)
-  become: true
-  ansible.builtin.command: "rc-update add {{ tailscale_service_name }} {{ 'default' if tailscale_service_enabled else '' }}"
-  register: _tailscale_openrc_result
-  changed_when: _tailscale_openrc_result.rc == 0
-  failed_when: _tailscale_openrc_result.rc != 0 and 'already added' not in _tailscale_openrc_result.stderr | default('')
-  when: >
-    _tailscale_service_manager == 'openrc' and
-    ansible_os_family in ['Alpine', 'Gentoo']
-
-- name: 🚀 Tailscale | service | Start service (OpenRC)
-  become: true
-  ansible.builtin.command: "rc-service {{ tailscale_service_name }} start"
-  register: _tailscale_openrc_start
-  changed_when: "'started' in _tailscale_openrc_start.stdout"
-  failed_when: _tailscale_openrc_start.rc != 0 and 'already started' not in _tailscale_openrc_start.stderr | default('')
-  when: >
-    _tailscale_service_manager == 'openrc' and
-    ansible_os_family in ['Alpine', 'Gentoo'] and
-    _tailscale_detected_immediate_start | bool
+# Pruned non-systemd managers due to role's OS scope
 
 # -----------------------------------------------------------------------------
 # 5. Service Verification

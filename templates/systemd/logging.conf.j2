@@ -1,0 +1,9 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+{{ ansible_managed | comment }}
+
+[Service]
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier={{ tailscale_syslog_identifier }}
+
+

@@ -47,6 +47,8 @@
   failed_when: false
   when: >
     ansible_pkg_mgr in ['apt', 'yum', 'dnf', 'zypper']
+  retries: 3
+  delay: 5
 
 # -----------------------------------------------------------------------------
 # 3. Install Required Packages
@@ -54,10 +56,9 @@
 - name: 📦 Tailscale | prerequisites | Install required packages
   become: true
   ansible.builtin.package:
-    name: "{{ item }}"
+    name: "{{ tailscale_prerequisites }}"
     state: present
     update_cache: true
-  loop: "{{ tailscale_prerequisites }}"
   register: _tailscale_package_install_result
   until: _tailscale_package_install_result is succeeded
   retries: 3

@@ -30,8 +30,8 @@
 - name: 🔍 Tailscale | validate | Validate operating system support
   ansible.builtin.assert:
     that:
-      - ansible_os_family in ['Debian', 'RedHat', 'Suse', 'Archlinux', 'Alpine']
-    fail_msg: "❌ Unsupported OS family '{{ ansible_os_family }}'. This role supports Debian-based distributions primarily."
+      - ansible_os_family in ['Debian']
+    fail_msg: "❌ Unsupported OS family '{{ ansible_os_family }}'. This role supports Debian-based distributions: Ubuntu 24.04 and Debian 12."
     success_msg: "✅ Operating system family is supported: {{ ansible_os_family }}"
   when: >
     tailscale_validate_prerequisites | bool
@@ -82,14 +82,7 @@
 # -----------------------------------------------------------------------------
 - name: 🔍 Tailscale | validate | Detect optimal GPG key management method
   ansible.builtin.set_fact:
-    _tailscale_detected_key_method: >-
-      {%- if tailscale_apt_key_type == 'auto' -%}
-      {%- if ansible_distribution == 'Ubuntu' -%}
-      {%- if ansible_distribution_version is version('20.04', '>=') -%}keyring{%- else -%}legacy{%- endif -%}
-      {%- elif ansible_distribution == 'Debian' -%}
-      {%- if ansible_distribution_major_version | int >= 11 -%}keyring{%- else -%}legacy{%- endif -%}
-      {%- else -%}keyring{%- endif -%}
-      {%- else -%}{{ tailscale_apt_key_type }}{%- endif -%}
+    _tailscale_detected_key_method: keyring
 
 - name: 🔍 Tailscale | validate | Detect version codename for repository URLs
   ansible.builtin.set_fact:
