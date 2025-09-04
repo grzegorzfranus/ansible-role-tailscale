@@ -19,7 +19,7 @@
 # -----------------------------------------------------------------------------
 # 1. Error Context Collection
 # -----------------------------------------------------------------------------
-- name: 📊 Tailscale | error | Collect current error context
+- name: Tailscale | error | Collect current error context
   ansible.builtin.set_fact:
     _tailscale_error_report:
       report_timestamp: "{{ ansible_date_time.iso8601 }}"
@@ -32,7 +32,7 @@
 # -----------------------------------------------------------------------------
 # 2. System Diagnostic Information
 # -----------------------------------------------------------------------------
-- name: 📊 Tailscale | error | Collect comprehensive system diagnostics
+- name: Tailscale | error | Collect comprehensive system diagnostics
   ansible.builtin.set_fact:
     _tailscale_system_diagnostics:
       # Operating System Information
@@ -71,7 +71,7 @@
 # -----------------------------------------------------------------------------
 # 3. Package Manager State
 # -----------------------------------------------------------------------------
-- name: 📊 Tailscale | error | Collect package manager information
+- name: Tailscale | error | Collect package manager information
   ansible.builtin.set_fact:
     _tailscale_package_diagnostics:
       package_manager: "{{ ansible_pkg_mgr }}"
@@ -80,7 +80,7 @@
   when: >
     tailscale_include_package_info | bool
 
-- name: 📊 Tailscale | error | Check current repository configuration
+- name: Tailscale | error | Check current repository configuration
   ansible.builtin.find:
     paths: "/etc/apt/sources.list.d"
     patterns: "*tailscale*"
@@ -90,7 +90,7 @@
     tailscale_include_package_info | bool and
     ansible_pkg_mgr == 'apt'
 
-- name: 📊 Tailscale | error | Check GPG keys
+- name: Tailscale | error | Check GPG keys
   ansible.builtin.find:
     paths: "/usr/share/keyrings"
     patterns: "*tailscale*"
@@ -103,7 +103,7 @@
 # -----------------------------------------------------------------------------
 # 4. Network Configuration Details
 # -----------------------------------------------------------------------------
-- name: 📊 Tailscale | error | Collect network configuration
+- name: Tailscale | error | Collect network configuration
   ansible.builtin.set_fact:
     _tailscale_network_diagnostics:
       # Network Interfaces
@@ -129,7 +129,7 @@
 # -----------------------------------------------------------------------------
 # 5. Service Status Information
 # -----------------------------------------------------------------------------
-- name: 📊 Tailscale | error | Check Tailscale service status
+- name: Tailscale | error | Check Tailscale service status
   ansible.builtin.systemd:
     name: "{{ tailscale_service_name }}"
   register: _tailscale_service_status
@@ -137,12 +137,12 @@
   when: >
     ansible_service_mgr == 'systemd'
 
-- name: 📊 Tailscale | error | Check if Tailscale binary exists
+- name: Tailscale | error | Check if Tailscale binary exists
   ansible.builtin.stat:
     path: "/usr/bin/tailscale"
   register: _tailscale_binary_check
 
-- name: 📊 Tailscale | error | Get Tailscale version if available
+- name: Tailscale | error | Get Tailscale version if available
   ansible.builtin.command: "/usr/bin/tailscale version"
   register: _tailscale_version_check
   failed_when: false
@@ -153,7 +153,7 @@
 # -----------------------------------------------------------------------------
 # 6. Log Collection
 # -----------------------------------------------------------------------------
-- name: 📊 Tailscale | error | Collect systemd journal logs
+- name: Tailscale | error | Collect systemd journal logs
   ansible.builtin.command: "journalctl -u {{ tailscale_service_name }} --lines={{ tailscale_error_log_lines }} --no-pager"
   register: _tailscale_journal_logs
   failed_when: false
@@ -162,7 +162,7 @@
     ansible_service_mgr == 'systemd' and
     tailscale_error_log_lines > 0
 
-- name: 📊 Tailscale | error | Collect system logs
+- name: Tailscale | error | Collect system logs
   ansible.builtin.command: "tail -n {{ tailscale_error_log_lines }} /var/log/syslog"
   register: _tailscale_syslog
   failed_when: false
@@ -174,7 +174,7 @@
 # -----------------------------------------------------------------------------
 # 7. Error Report Generation
 # -----------------------------------------------------------------------------
-- name: 📊 Tailscale | error | Generate comprehensive error report
+- name: Tailscale | error | Generate comprehensive error report
   ansible.builtin.set_fact:
     tailscale_error_report:
       # Report Metadata
@@ -224,7 +224,7 @@
         journal: "{{ _tailscale_journal_logs.stdout | default('not_collected') if _tailscale_journal_logs is defined else 'not_available' }}"
         syslog: "{{ _tailscale_syslog.stdout | default('not_collected') if _tailscale_syslog is defined else 'not_available' }}"
 
-- name: 📋 Tailscale | error | Display detailed error report
+- name: Tailscale | error | Display detailed error report
   ansible.builtin.debug:
     msg:
       - "🚨 TAILSCALE ROLE ERROR REPORT 🚨"
@@ -243,7 +243,7 @@
       - "📧 Please include this report when contacting support@tailscale.com"
       - "🔗 Or file an issue at: https://github.com/tailscale/tailscale/issues"
 
-- name: 📊 Tailscale | error | Save error report to file
+- name: Tailscale | error | Save error report to file
   ansible.builtin.copy:
     content: "{{ tailscale_error_report | to_nice_yaml }}"
     dest: "/tmp/tailscale-role-error-{{ ansible_date_time.epoch }}.yaml"

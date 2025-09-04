@@ -28,7 +28,7 @@
 # -----------------------------------------------------------------------------
 # 1. Stop and disable service (systemd)
 # -----------------------------------------------------------------------------
-- name: 🛑 Tailscale | remove | Stop and disable service (systemd)
+- name: Tailscale | remove | Stop and disable service (systemd)
   become: true
   ansible.builtin.systemd:
     name: "{{ tailscale_service_name }}"
@@ -41,7 +41,7 @@
 # -----------------------------------------------------------------------------
 # 2. Remove APT repository (signed-by)
 # -----------------------------------------------------------------------------
-- name: 🗑️ Tailscale | remove | Remove apt repository (signed-by)
+- name: Tailscale | remove | Remove apt repository (signed-by)
   become: true
   ansible.builtin.apt_repository:
     repo: "deb [signed-by={{ tailscale_repo_key_path }}] https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_distribution | lower }} {{ _tailscale_version_codename }} main"
@@ -51,7 +51,7 @@
 # -----------------------------------------------------------------------------
 # 3. Remove repository keyring
 # -----------------------------------------------------------------------------
-- name: 🧹 Tailscale | remove | Remove repository keyring
+- name: Tailscale | remove | Remove repository keyring
   become: true
   ansible.builtin.file:
     path: "{{ tailscale_repo_key_path }}"
@@ -60,7 +60,7 @@
 # -----------------------------------------------------------------------------
 # 4. Remove tailscale package
 # -----------------------------------------------------------------------------
-- name: 🧹 Tailscale | remove | Remove tailscale package
+- name: Tailscale | remove | Remove tailscale package
   become: true
   ansible.builtin.package:
     name: tailscale
@@ -69,7 +69,7 @@
 # -----------------------------------------------------------------------------
 # 5. Remove rsyslog configuration
 # -----------------------------------------------------------------------------
-- name: 🧹 Tailscale | remove | Remove rsyslog configuration
+- name: Tailscale | remove | Remove rsyslog configuration
   become: true
   ansible.builtin.file:
     path: "/etc/rsyslog.d/{{ tailscale_rsyslog_config_file }}"
@@ -78,7 +78,7 @@
 # -----------------------------------------------------------------------------
 # 6. Remove logrotate configuration
 # -----------------------------------------------------------------------------
-- name: 🧹 Tailscale | remove | Remove logrotate configuration
+- name: Tailscale | remove | Remove logrotate configuration
   become: true
   ansible.builtin.file:
     path: "/etc/logrotate.d/tailscale"
@@ -87,7 +87,7 @@
 # -----------------------------------------------------------------------------
 # 7. Remove systemd logging override (systemd only)
 # -----------------------------------------------------------------------------
-- name: 🧹 Tailscale | remove | Remove systemd logging override
+- name: Tailscale | remove | Remove systemd logging override
   become: true
   ansible.builtin.file:
     path: "/etc/systemd/system/{{ tailscale_service_name }}.service.d/logging.conf"
@@ -98,7 +98,7 @@
 # -----------------------------------------------------------------------------
 # 8. Reload systemd (systemd only)
 # -----------------------------------------------------------------------------
-- name: 🔄 Tailscale | remove | Reload systemd if needed
+- name: Tailscale | remove | Reload systemd if needed
   become: true
   ansible.builtin.systemd:
     daemon_reload: true
@@ -108,7 +108,7 @@
 # -----------------------------------------------------------------------------
 # 9. Optionally remove log directory
 # -----------------------------------------------------------------------------
-- name: 🧼 Tailscale | remove | Optionally remove log directory
+- name: Tailscale | remove | Optionally remove log directory
   become: true
   ansible.builtin.file:
     path: "{{ tailscale_log_dir }}"

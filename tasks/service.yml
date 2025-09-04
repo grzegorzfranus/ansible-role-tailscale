@@ -19,7 +19,7 @@
 # -----------------------------------------------------------------------------
 # 1. Service Manager Detection
 # -----------------------------------------------------------------------------
-- name: 🔍 Tailscale | service | Detect optimal service manager
+- name: Tailscale | service | Detect optimal service manager
   ansible.builtin.set_fact:
     _tailscale_service_manager: >-
       {%- if tailscale_service_manager == 'auto' -%}
@@ -28,7 +28,7 @@
         {{ tailscale_service_manager }}
       {%- endif -%}
 
-- name: 📋 Tailscale | service | Display service management configuration
+- name: Tailscale | service | Display service management configuration
   ansible.builtin.debug:
     msg:
       - "🔧 Service Management Configuration:"
@@ -40,7 +40,7 @@
 # -----------------------------------------------------------------------------
 # 2. Configure Service Startup Behavior (systemd)
 # -----------------------------------------------------------------------------
-- name: 🔧 Tailscale | service | Configure Tailscale service startup (systemd)
+- name: Tailscale | service | Configure Tailscale service startup (systemd)
   become: true
   ansible.builtin.systemd:
     name: "{{ tailscale_service_name }}"
@@ -53,7 +53,7 @@
 # -----------------------------------------------------------------------------
 # 3. Handle Immediate Start Requirements
 # -----------------------------------------------------------------------------
-- name: 🚀 Tailscale | service | Start service immediately (Special Distributions)
+- name: Tailscale | service | Start service immediately (Special Distributions)
   become: true
   ansible.builtin.systemd:
     name: "{{ tailscale_service_name }}"
@@ -64,7 +64,7 @@
     _tailscale_detected_immediate_start | bool and
     tailscale_service_enabled | bool
 
-- name: 📋 Tailscale | service | Log immediate start action
+- name: Tailscale | service | Log immediate start action
   ansible.builtin.debug:
     msg: "🚀 Started {{ tailscale_service_name }} immediately due to distribution requirements ({{ ansible_distribution }})"
   when: >
@@ -79,7 +79,7 @@
 # -----------------------------------------------------------------------------
 # 5. Service Verification
 # -----------------------------------------------------------------------------
-- name: 🔍 Tailscale | service | Verify service configuration (systemd)
+- name: Tailscale | service | Verify service configuration (systemd)
   ansible.builtin.systemd:
     name: "{{ tailscale_service_name }}"
   register: _tailscale_service_status
@@ -87,7 +87,7 @@
   when: >
     _tailscale_service_manager == 'systemd'
 
-- name: 🔍 Tailscale | service | Check service status (OpenRC)
+- name: Tailscale | service | Check service status (OpenRC)
   ansible.builtin.command: "rc-service {{ tailscale_service_name }} status"
   register: _tailscale_openrc_status
   failed_when: false
@@ -98,7 +98,7 @@
 # -----------------------------------------------------------------------------
 # 6. Status Reporting
 # -----------------------------------------------------------------------------
-- name: 📊 Tailscale | service | Report service configuration status
+- name: Tailscale | service | Report service configuration status
   ansible.builtin.debug:
     msg:
       - "✅ Tailscale Service Configuration Completed:"
@@ -117,11 +117,11 @@
 # -----------------------------------------------------------------------------
 # 7. Error Handling with Enhanced Reporting
 # -----------------------------------------------------------------------------
-- name: 🚨 Tailscale | service | Handle service configuration errors
+- name: Tailscale | service | Handle service configuration errors
   ansible.builtin.include_tasks: error_reporting.yml
-  when:
-    - tailscale_enhanced_error_reporting | bool
-    - >
-      (_tailscale_service_status is defined and _tailscale_service_status.failed | default(false)) or
+  when: >
+    tailscale_enhanced_error_reporting | bool and (
+      (_tailscale_service_status is defined and (_tailscale_service_status.failed | default(false))) or
       (_tailscale_openrc_result is defined and _tailscale_openrc_result.rc is defined and _tailscale_openrc_result.rc != 0) or
       (_tailscale_openrc_start is defined and _tailscale_openrc_start.rc is defined and _tailscale_openrc_start.rc != 0)
+    )

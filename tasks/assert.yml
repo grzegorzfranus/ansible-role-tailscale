@@ -16,7 +16,7 @@
 # -----------------------------------------------------------------------------
 # 1. Repository Configuration Variables Validation
 # -----------------------------------------------------------------------------
-- name: 🧪 Tailscale | assert | Validate repository key URL
+- name: Tailscale | assert | Validate repository key URL
   ansible.builtin.assert:
     that:
       - tailscale_repo_key_url is defined
@@ -26,7 +26,7 @@
     fail_msg: "❌ Invalid repository key URL '{{ tailscale_repo_key_url | default('undefined') }}'. Must be a valid HTTPS URL ending with .gpg"
     success_msg: "✅ Repository key URL is valid: {{ tailscale_repo_key_url }}"
 
-- name: 🧪 Tailscale | assert | Validate repository key path
+- name: Tailscale | assert | Validate repository key path
   ansible.builtin.assert:
     that:
       - tailscale_repo_key_path is defined
@@ -36,7 +36,7 @@
     fail_msg: "❌ Invalid repository key path '{{ tailscale_repo_key_path | default('undefined') }}'. Must be a valid absolute file path"
     success_msg: "✅ Repository key path is valid: {{ tailscale_repo_key_path }}"
 
-- name: 🧪 Tailscale | assert | Validate repository list URL
+- name: Tailscale | assert | Validate repository list URL
   ansible.builtin.assert:
     that:
       - tailscale_repo_list_url is defined
@@ -49,7 +49,7 @@
 # -----------------------------------------------------------------------------
 # 2. Service Configuration Variables Validation
 # -----------------------------------------------------------------------------
-- name: 🧪 Tailscale | assert | Validate service name
+- name: Tailscale | assert | Validate service name
   ansible.builtin.assert:
     that:
       - tailscale_service_name is defined
@@ -59,7 +59,7 @@
     fail_msg: "❌ Invalid service name '{{ tailscale_service_name | default('undefined') }}'. Must be a non-empty string containing only alphanumeric characters, underscores, and hyphens"
     success_msg: "✅ Service name is valid: {{ tailscale_service_name }}"
 
-- name: 🧪 Tailscale | assert | Validate service enabled setting
+- name: Tailscale | assert | Validate service enabled setting
   ansible.builtin.assert:
     that:
       - tailscale_service_enabled is defined
@@ -67,31 +67,60 @@
     fail_msg: "❌ Invalid service enabled setting '{{ tailscale_service_enabled | default('undefined') }}'. Must be boolean (true/false)"
     success_msg: "✅ Service enabled setting is valid: {{ tailscale_service_enabled }}"
 
+- name: Tailscale | assert | Validate service state choice
+  ansible.builtin.assert:
+    that:
+      - tailscale_state in ['present', 'absent']
+    fail_msg: "❌ Invalid tailscale_state '{{ tailscale_state | default('undefined') }}'. Allowed: present, absent"
+    success_msg: "✅ Service state is valid: {{ tailscale_state }}"
+
+- name: Tailscale | assert | Validate systemctl start setting
+  ansible.builtin.assert:
+    that:
+      - (tailscale_systemctl_start is string and (tailscale_systemctl_start in ['auto', 'true', 'false'])) or
+        (tailscale_systemctl_start is boolean)
+    fail_msg: "❌ Invalid tailscale_systemctl_start '{{ tailscale_systemctl_start | default('undefined') }}'. Allowed: 'auto', true, or false"
+    success_msg: "✅ Systemctl start setting is valid: {{ tailscale_systemctl_start }}"
+
 # -----------------------------------------------------------------------------
 # 3.1. Choice validations and numeric ranges
 # -----------------------------------------------------------------------------
-- name: 🧪 Tailscale | assert | Validate track choice
+- name: Tailscale | assert | Validate track choice
   ansible.builtin.assert:
     that:
       - tailscale_track in ['stable', 'unstable']
     fail_msg: "❌ Invalid tailscale_track '{{ tailscale_track }}'. Allowed: stable, unstable"
     success_msg: "✅ Track is valid: {{ tailscale_track }}"
 
-- name: 🧪 Tailscale | assert | Validate service manager choice
+- name: Tailscale | assert | Validate service manager choice
   ansible.builtin.assert:
     that:
       - tailscale_service_manager in ['auto', 'systemd']
     fail_msg: "❌ Invalid tailscale_service_manager '{{ tailscale_service_manager }}'. Allowed: auto, systemd"
     success_msg: "✅ Service manager is valid: {{ tailscale_service_manager }}"
 
-- name: 🧪 Tailscale | assert | Validate connectivity timeout
+- name: Tailscale | assert | Validate install method choice
+  ansible.builtin.assert:
+    that:
+      - tailscale_install_method in ['package', 'binary']
+    fail_msg: "❌ Invalid tailscale_install_method '{{ tailscale_install_method | default('undefined') }}'. Allowed: package, binary"
+    success_msg: "✅ Install method is valid: {{ tailscale_install_method }}"
+
+- name: Tailscale | assert | Validate apt key type choice
+  ansible.builtin.assert:
+    that:
+      - tailscale_apt_key_type in ['auto', 'legacy', 'keyring']
+    fail_msg: "❌ Invalid tailscale_apt_key_type '{{ tailscale_apt_key_type | default('undefined') }}'. Allowed: auto, legacy, keyring"
+    success_msg: "✅ APT key type is valid: {{ tailscale_apt_key_type }}"
+
+- name: Tailscale | assert | Validate connectivity timeout
   ansible.builtin.assert:
     that:
       - (tailscale_connectivity_timeout | int) > 0
     fail_msg: "❌ tailscale_connectivity_timeout must be > 0"
     success_msg: "✅ Connectivity timeout is valid: {{ tailscale_connectivity_timeout }}"
 
-- name: 🧪 Tailscale | assert | Validate error log lines
+- name: Tailscale | assert | Validate error log lines
   ansible.builtin.assert:
     that:
       - (tailscale_error_log_lines | int) >= 0
@@ -101,7 +130,7 @@
 # -----------------------------------------------------------------------------
 # 3. Authentication Variables Validation
 # -----------------------------------------------------------------------------
-- name: 🧪 Tailscale | assert | Validate authentication key type
+- name: Tailscale | assert | Validate authentication key type
   ansible.builtin.assert:
     that:
       - tailscale_auth_key is defined
@@ -109,7 +138,7 @@
     fail_msg: "❌ Invalid authentication key '{{ tailscale_auth_key | default('undefined') }}'. Must be defined as a string"
     success_msg: "✅ Authentication key type is valid: string"
 
-- name: 🧪 Tailscale | assert | Validate extra arguments type
+- name: Tailscale | assert | Validate extra arguments type
   ansible.builtin.assert:
     that:
       - tailscale_extra_args is defined
@@ -117,7 +146,7 @@
     fail_msg: "❌ Invalid extra arguments '{{ tailscale_extra_args | default('undefined') }}'. Must be defined as a string"
     success_msg: "✅ Extra arguments type is valid: string"
 
-- name: 🧪 Tailscale | assert | Validate extra arguments content
+- name: Tailscale | assert | Validate extra arguments content
   ansible.builtin.assert:
     that:
       - tailscale_extra_args is match("^[a-zA-Z0-9=._\\-]*$") or tailscale_extra_args == ""
@@ -127,7 +156,7 @@
 # -----------------------------------------------------------------------------
 # 4. Package Prerequisites Validation
 # -----------------------------------------------------------------------------
-- name: 🧪 Tailscale | assert | Validate prerequisites list type
+- name: Tailscale | assert | Validate prerequisites list type
   ansible.builtin.assert:
     that:
       - tailscale_prerequisites is defined
@@ -136,9 +165,63 @@
     fail_msg: "❌ Invalid prerequisites list '{{ tailscale_prerequisites | default('undefined') }}'. Must be a sequence/list"
     success_msg: "✅ Prerequisites list type is valid: sequence"
 
-- name: 🧪 Tailscale | assert | Validate prerequisites list is not empty
+- name: Tailscale | assert | Validate prerequisites list is not empty
   ansible.builtin.assert:
     that:
       - tailscale_prerequisites | length > 0
     fail_msg: "❌ Prerequisites list cannot be empty. Must contain at least one package"
     success_msg: "✅ Prerequisites list contains {{ tailscale_prerequisites | length }} packages"
+
+# -----------------------------------------------------------------------------
+# 5. Validation Settings and Logging Configuration
+# -----------------------------------------------------------------------------
+- name: Tailscale | assert | Validate validation flags are boolean
+  ansible.builtin.assert:
+    that:
+      - tailscale_validate_system is boolean
+      - tailscale_validate_connectivity is boolean
+      - tailscale_validate_prerequisites is boolean
+      - tailscale_collect_system_info is boolean
+    fail_msg: "❌ Validation flags must be boolean"
+    success_msg: "✅ Validation flags are boolean"
+
+- name: Tailscale | assert | Validate error reporting flags are boolean
+  ansible.builtin.assert:
+    that:
+      - tailscale_enhanced_error_reporting is boolean
+      - tailscale_include_hardware_info is boolean
+      - tailscale_include_network_info is boolean
+      - tailscale_include_package_info is boolean
+    fail_msg: "❌ Error reporting flags must be boolean"
+    success_msg: "✅ Error reporting flags are boolean"
+
+- name: Tailscale | assert | Validate logging configuration basics
+  ansible.builtin.assert:
+    that:
+      - tailscale_enable_logging is boolean
+      - tailscale_log_dir is match('^/.+')
+      - tailscale_log_file is match('^/.+')
+      - tailscale_log_file_permissions is match('^[0-7]{4}$')
+      - tailscale_log_dir_permissions is match('^[0-7]{4}$')
+      - tailscale_log_user is string
+      - tailscale_log_group is string
+      - tailscale_syslog_identifier is string and tailscale_syslog_identifier | length > 0
+      - tailscale_rsyslog_config_file is string and tailscale_rsyslog_config_file is match('^.+\.conf$')
+    fail_msg: "❌ Invalid logging configuration values"
+    success_msg: "✅ Logging configuration basics are valid"
+
+- name: Tailscale | assert | Validate logrotate options structure
+  ansible.builtin.assert:
+    that:
+      - tailscale_logrotate_options is mapping
+      - tailscale_logrotate_options.enabled is boolean
+      - tailscale_logrotate_options.frequency in ['hourly', 'daily', 'weekly', 'monthly']
+      - (tailscale_logrotate_options.rotate_count | int) >= 0
+      - tailscale_logrotate_options.compress is boolean
+      - tailscale_logrotate_options.notifempty is boolean
+      - tailscale_logrotate_options.copytruncate is boolean
+      - tailscale_logrotate_options.dateext is boolean
+      - tailscale_logrotate_options.dateformat is string
+      - (tailscale_logrotate_options.olddir == '') or (tailscale_logrotate_options.olddir is match('^/.+'))
+    fail_msg: "❌ Invalid logrotate options structure or values"
+    success_msg: "✅ Logrotate options structure is valid"

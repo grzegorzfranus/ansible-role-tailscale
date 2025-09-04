@@ -20,7 +20,7 @@
 # -----------------------------------------------------------------------------
 # 1. Validate Prerequisites List
 # -----------------------------------------------------------------------------
-- name: 🔍 Tailscale | prerequisites | Validate prerequisites list
+- name: Tailscale | prerequisites | Validate prerequisites list
   ansible.builtin.assert:
     that:
       - tailscale_prerequisites is defined
@@ -28,7 +28,7 @@
     fail_msg: "❌ Prerequisites list is empty or undefined"
     success_msg: "✅ Prerequisites list validated: {{ tailscale_prerequisites | join(', ') }}"
 
-- name: 📋 Tailscale | prerequisites | Display prerequisites to install
+- name: Tailscale | prerequisites | Display prerequisites to install
   ansible.builtin.debug:
     msg:
       - "📦 Installing Tailscale Prerequisites:"
@@ -39,7 +39,7 @@
 # -----------------------------------------------------------------------------
 # 2. Update Package Cache (if needed)
 # -----------------------------------------------------------------------------
-- name: 🔄 Tailscale | prerequisites | Update package cache before installation
+- name: Tailscale | prerequisites | Update package cache before installation
   become: true
   ansible.builtin.package:
     update_cache: true
@@ -53,7 +53,7 @@
 # -----------------------------------------------------------------------------
 # 3. Install Required Packages
 # -----------------------------------------------------------------------------
-- name: 📦 Tailscale | prerequisites | Install required packages
+- name: Tailscale | prerequisites | Install required packages
   become: true
   ansible.builtin.package:
     name: "{{ tailscale_prerequisites }}"
@@ -67,7 +67,7 @@
 # -----------------------------------------------------------------------------
 # 4. Verify Installation
 # -----------------------------------------------------------------------------
-- name: 🔍 Tailscale | prerequisites | Verify package installation
+- name: Tailscale | prerequisites | Verify package installation
   ansible.builtin.command: "which {{ item }}"
   register: _tailscale_package_verification
   failed_when: false
@@ -76,7 +76,7 @@
   when: >
     item in ['curl', 'wget', 'gnupg', 'gpg']
 
-- name: 📊 Tailscale | prerequisites | Report installation status
+- name: Tailscale | prerequisites | Report installation status
   ansible.builtin.debug:
     msg:
       - "✅ Prerequisites Installation Completed:"
@@ -89,7 +89,7 @@
 # -----------------------------------------------------------------------------
 # 5. Error Handling
 # -----------------------------------------------------------------------------
-- name: 🚨 Tailscale | prerequisites | Handle installation errors
+- name: Tailscale | prerequisites | Handle installation errors
   ansible.builtin.include_tasks: error_reporting.yml
   when: >
     tailscale_enhanced_error_reporting | bool and

@@ -19,7 +19,7 @@
 # -----------------------------------------------------------------------------
 # 1. Create Required Directories
 # -----------------------------------------------------------------------------
-- name: 🔧 Tailscale | repository | Create keyrings directory
+- name: Tailscale | repository | Create keyrings directory
   become: true
   ansible.builtin.file:
     path: "/usr/share/keyrings"
@@ -28,7 +28,7 @@
     owner: root
     group: root
 
-- name: 🔧 Tailscale | repository | Create sources.list.d directory
+- name: Tailscale | repository | Create sources.list.d directory
   become: true
   ansible.builtin.file:
     path: "/etc/apt/sources.list.d"
@@ -40,7 +40,7 @@
 # -----------------------------------------------------------------------------
 # 2. Key Management (Keyring Only)
 # -----------------------------------------------------------------------------
-- name: 🔑 Tailscale | repository | Add repository key (Keyring Method)
+- name: Tailscale | repository | Add repository key (Keyring Method)
   become: true
   ansible.builtin.get_url:
     url: "{{ tailscale_repo_key_url }}"
@@ -57,7 +57,7 @@
 # -----------------------------------------------------------------------------
 # 3. Configure APT Repository
 # -----------------------------------------------------------------------------
-- name: 🔧 Tailscale | repository | Configure apt repository
+- name: Tailscale | repository | Configure apt repository
   become: true
   ansible.builtin.apt_repository:
     repo: "deb [signed-by={{ tailscale_repo_key_path }}] https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_distribution | lower }} {{ _tailscale_version_codename }} main"
@@ -72,7 +72,7 @@
 # -----------------------------------------------------------------------------
 # 5. Update Package Cache
 # -----------------------------------------------------------------------------
-- name: 🔄 Tailscale | repository | Update package cache
+- name: Tailscale | repository | Update package cache
   become: true
   ansible.builtin.apt:
     update_cache: true
@@ -81,12 +81,13 @@
   retries: 3
   delay: 5
   until: _tailscale_cache_update is succeeded
-  when: not ansible_check_mode
+  when: >
+    not ansible_check_mode
 
 # -----------------------------------------------------------------------------
 # 6. Verification
 # -----------------------------------------------------------------------------
-- name: 🔍 Tailscale | repository | Verify repository configuration
+- name: Tailscale | repository | Verify repository configuration
   ansible.builtin.command: "apt-cache policy tailscale"
   register: _tailscale_repo_verification
   changed_when: false
@@ -94,7 +95,7 @@
     - _tailscale_repo_verification.rc != 0
     - "'No packages found' in _tailscale_repo_verification.stderr"
 
-- name: 📋 Tailscale | repository | Display repository verification
+- name: Tailscale | repository | Display repository verification
   ansible.builtin.debug:
     msg:
       - "🎯 Repository Configuration Completed Successfully:"

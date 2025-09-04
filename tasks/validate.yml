@@ -18,7 +18,7 @@
 # -----------------------------------------------------------------------------
 # 1. Architecture and System Validation
 # -----------------------------------------------------------------------------
-- name: 🔍 Tailscale | validate | Check system architecture support
+- name: Tailscale | validate | Check system architecture support
   ansible.builtin.assert:
     that:
       - ansible_architecture in _tailscale_supported_architectures
@@ -27,7 +27,7 @@
   when: >
     tailscale_validate_prerequisites | bool
 
-- name: 🔍 Tailscale | validate | Validate operating system support
+- name: Tailscale | validate | Validate operating system support
   ansible.builtin.assert:
     that:
       - ansible_os_family in ['Debian']
@@ -36,7 +36,7 @@
   when: >
     tailscale_validate_prerequisites | bool
 
-- name: 🔍 Tailscale | validate | Check distribution version support
+- name: Tailscale | validate | Check distribution version support
   ansible.builtin.assert:
     that:
       - (ansible_distribution == 'Ubuntu' and ansible_distribution_version == '24.04') or
@@ -49,7 +49,7 @@
 # -----------------------------------------------------------------------------
 # 2. Package Manager Detection and Validation
 # -----------------------------------------------------------------------------
-- name: 🔍 Tailscale | validate | Detect package manager availability
+- name: Tailscale | validate | Detect package manager availability
   ansible.builtin.command: "which {{ ansible_pkg_mgr }}"
   register: _tailscale_pkg_mgr_check
   failed_when: false
@@ -57,7 +57,7 @@
   when: >
     tailscale_validate_prerequisites | bool
 
-- name: 🧪 Tailscale | validate | Assert package manager is functional
+- name: Tailscale | validate | Assert package manager is functional
   ansible.builtin.assert:
     that:
       - _tailscale_pkg_mgr_check.rc == 0
@@ -67,7 +67,7 @@
   when: >
     tailscale_validate_prerequisites | bool
 
-- name: 🔍 Tailscale | validate | Test package manager functionality
+- name: Tailscale | validate | Test package manager functionality
   ansible.builtin.package:
     name: "{{ tailscale_prerequisites[0] }}"
     state: present
@@ -80,22 +80,22 @@
 # -----------------------------------------------------------------------------
 # 3. Smart GPG Key Method Detection
 # -----------------------------------------------------------------------------
-- name: 🔍 Tailscale | validate | Detect optimal GPG key management method
+- name: Tailscale | validate | Detect optimal GPG key management method
   ansible.builtin.set_fact:
     _tailscale_detected_key_method: keyring
 
-- name: 🔍 Tailscale | validate | Detect version codename for repository URLs
+- name: Tailscale | validate | Detect version codename for repository URLs
   ansible.builtin.set_fact:
     _tailscale_version_codename: "{{ ansible_distribution_release }}"
 
-- name: 🔍 Tailscale | validate | Detect service startup requirements
+- name: Tailscale | validate | Detect service startup requirements
   ansible.builtin.set_fact:
     _tailscale_detected_immediate_start: >-
       {%- if tailscale_systemctl_start == 'auto' -%}
       {%- if ansible_distribution == 'Kali' -%}true{%- else -%}false{%- endif -%}
       {%- else -%}{{ tailscale_systemctl_start | string }}{%- endif -%}
 
-- name: 📋 Tailscale | validate | Display detected configuration
+- name: Tailscale | validate | Display detected configuration
   ansible.builtin.debug:
     msg:
       - "🔧 Smart Configuration Detection Results:"
@@ -107,7 +107,7 @@
 # -----------------------------------------------------------------------------
 # 4. Network Connectivity Validation
 # -----------------------------------------------------------------------------
-- name: 🔍 Tailscale | validate | Test connectivity to Tailscale repository
+- name: Tailscale | validate | Test connectivity to Tailscale repository
   ansible.builtin.uri:
     url: "{{ _tailscale_connectivity_endpoints.repository }}/{{ tailscale_track }}/{{ ansible_distribution | lower }}/{{ _tailscale_version_codename }}.list"
     method: HEAD
@@ -118,7 +118,7 @@
   when: >
     tailscale_validate_connectivity | bool
 
-- name: 🔍 Tailscale | validate | Test connectivity to Tailscale API
+- name: Tailscale | validate | Test connectivity to Tailscale API
   ansible.builtin.uri:
     url: "{{ _tailscale_connectivity_endpoints.api }}/api/v2/tailnet"
     method: HEAD
@@ -129,7 +129,7 @@
   when: >
     tailscale_validate_connectivity | bool
 
-- name: 🧪 Tailscale | validate | Assert repository connectivity
+- name: Tailscale | validate | Assert repository connectivity
   ansible.builtin.assert:
     that:
       - _tailscale_repo_connectivity.status | default(0) == 200
@@ -139,7 +139,7 @@
     tailscale_validate_connectivity | bool and
     _tailscale_repo_connectivity is defined
 
-- name: ⚠️ Tailscale | validate | Warn about API connectivity
+- name: Tailscale | validate | Warn about API connectivity
   ansible.builtin.debug:
     msg: "⚠️ Warning: Cannot reach Tailscale API. This may affect some features but installation can continue."
   when: >
@@ -150,7 +150,7 @@
 # -----------------------------------------------------------------------------
 # 5. System Information Collection
 # -----------------------------------------------------------------------------
-- name: 📊 Tailscale | validate | Collect comprehensive system information
+- name: Tailscale | validate | Collect comprehensive system information
   ansible.builtin.set_fact:
     tailscale_system_info:
       # Basic system information
@@ -185,7 +185,7 @@
   when: >
     tailscale_collect_system_info | bool
 
-- name: 📊 Tailscale | validate | Collect hardware information
+- name: Tailscale | validate | Collect hardware information
   ansible.builtin.set_fact:
     tailscale_hardware_info:
       memory_mb: "{{ ansible_memtotal_mb }}"
@@ -196,7 +196,7 @@
     tailscale_collect_system_info | bool and
     tailscale_include_hardware_info | bool
 
-- name: 📊 Tailscale | validate | Collect network information
+- name: Tailscale | validate | Collect network information
   ansible.builtin.set_fact:
     tailscale_network_info:
       default_ipv4: "{{ ansible_default_ipv4.address | default('none') }}"
@@ -211,7 +211,7 @@
 # -----------------------------------------------------------------------------
 # 6. Enhanced Error Reporting Setup
 # -----------------------------------------------------------------------------
-- name: 📋 Tailscale | validate | Display comprehensive system summary
+- name: Tailscale | validate | Display comprehensive system summary
   ansible.builtin.debug:
     msg:
       - "🎯 Tailscale Role System Validation Summary:"
@@ -229,7 +229,7 @@
   when: >
     tailscale_collect_system_info | bool
 
-- name: 📊 Tailscale | validate | Setup error reporting context
+- name: Tailscale | validate | Setup error reporting context
   ansible.builtin.set_fact:
     _tailscale_error_context:
       validation_completed: true

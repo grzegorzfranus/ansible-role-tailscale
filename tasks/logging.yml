@@ -16,7 +16,7 @@
 # -----------------------------------------------------------------------------
 # 1. Log Directory Management
 # -----------------------------------------------------------------------------
-- name: 📁 Tailscale | logging | Create Tailscale log directory
+- name: Tailscale | logging | Create Tailscale log directory
   become: true
   ansible.builtin.file:
     path: "{{ tailscale_log_dir }}"
@@ -25,7 +25,7 @@
     owner: "{{ tailscale_log_user }}"
     group: "{{ tailscale_log_group }}"
 
-- name: 📝 Tailscale | logging | Create Tailscale log file
+- name: Tailscale | logging | Create Tailscale log file
   become: true
   ansible.builtin.file:
     path: "{{ tailscale_log_file }}"
@@ -39,13 +39,13 @@
 # -----------------------------------------------------------------------------
 # 2. RSyslog Integration
 # -----------------------------------------------------------------------------
-- name: 📦 Tailscale | logging | Install rsyslog package
+- name: Tailscale | logging | Install rsyslog package
   become: true
   ansible.builtin.package:
     name: rsyslog
     state: present
 
-- name: 📁 Tailscale | logging | Ensure rsyslog.d directory exists
+- name: Tailscale | logging | Ensure rsyslog.d directory exists
   become: true
   ansible.builtin.file:
     path: /etc/rsyslog.d
@@ -54,7 +54,7 @@
     owner: root
     group: root
 
-- name: 🔧 Tailscale | logging | Configure rsyslog for Tailscale
+- name: Tailscale | logging | Configure rsyslog for Tailscale
   become: true
   ansible.builtin.template:
     src: rsyslog/tailscale.conf.j2
@@ -63,12 +63,13 @@
     owner: root
     group: root
     backup: true
+    validate: "rsyslogd -N1 -f %s"
   notify: 🔄 Tailscale | handlers | Restart rsyslog
 
 # -----------------------------------------------------------------------------
 # 3. Systemd Service Override Configuration
 # -----------------------------------------------------------------------------
-- name: 📁 Tailscale | logging | Create systemd override directory
+- name: Tailscale | logging | Create systemd override directory
   become: true
   ansible.builtin.file:
     path: "/etc/systemd/system/{{ tailscale_service_name }}.service.d"
@@ -79,7 +80,7 @@
   when: >
     ansible_service_mgr == 'systemd'
 
-- name: 🔧 Tailscale | logging | Configure systemd service override for logging
+- name: Tailscale | logging | Configure systemd service override for logging
   become: true
   ansible.builtin.template:
     src: systemd/logging.conf.j2
@@ -88,6 +89,7 @@
     owner: root
     group: root
     backup: true
+    validate: "systemd-analyze verify %s"
   notify:
     - 🔄 Tailscale | handlers | Reload systemd
     - 🔄 Tailscale | handlers | Restart Tailscale service
@@ -97,7 +99,7 @@
 # -----------------------------------------------------------------------------
 # 4. Log Rotation Configuration
 # -----------------------------------------------------------------------------
-- name: 📦 Tailscale | logging | Install logrotate package
+- name: Tailscale | logging | Install logrotate package
   become: true
   ansible.builtin.package:
     name: logrotate
@@ -105,7 +107,7 @@
   when: >
     tailscale_logrotate_options.enabled | bool
 
-- name: 📁 Tailscale | logging | Create logrotate olddir directory
+- name: Tailscale | logging | Create logrotate olddir directory
   become: true
   ansible.builtin.file:
     path: "{{ tailscale_logrotate_options.olddir }}"
@@ -117,7 +119,7 @@
     tailscale_logrotate_options.enabled | bool and
     tailscale_logrotate_options.olddir | length > 0
 
-- name: 🔧 Tailscale | logging | Configure logrotate for Tailscale
+- name: Tailscale | logging | Configure logrotate for Tailscale
   become: true
   ansible.builtin.template:
     src: logrotate/tailscale.j2
@@ -126,13 +128,14 @@
     owner: root
     group: root
     backup: true
+    validate: "logrotate -d %s"
   when: >
     tailscale_logrotate_options.enabled | bool
 
 # -----------------------------------------------------------------------------
 # 5. Configuration Verification and Status
 # -----------------------------------------------------------------------------
-- name: 📋 Tailscale | logging | Display logging configuration status
+- name: Tailscale | logging | Display logging configuration status
   ansible.builtin.debug:
     msg:
       - "✅ Tailscale Logging Configuration Completed:"

@@ -205,13 +205,14 @@ With this configuration, Tailscale logs will be directed to `/var/log/tailscale/
 | `tailscale_apt_key_type` | GPG key management method. This role uses the modern keyring method; legacy `apt-key` is not supported. | `"auto"` |
 | `tailscale_install_method` | Installation method preference: `package` (recommended) or `binary` (future enhancement) | `"package"` |
 
-### Service Configuration
+### Service State and Configuration
 
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `tailscale_service_enabled` | Whether the Tailscale service starts automatically on system boot | `true` |
 | `tailscale_systemctl_start` | Service startup behavior: `auto` (detect if immediate start needed), `true` (always start), `false` (never start immediately) | `"auto"` |
 | `tailscale_service_manager` | Service manager detection: `auto` (detect) or `systemd` (force systemd). OpenRC is not supported by this role. | `"auto"` |
+| `tailscale_state` | Overall role behavior: `present` to install, `absent` to uninstall | `"present"` |
 
 ### System Validation Settings
 
@@ -475,13 +476,10 @@ ansible-role-tailscale/
 - `setup` - Setup and configuration tasks
 - `init` - Initial environment setup and variable loading
 - `validate` - Variable validation and system checks
+- `requirements` - Prerequisite and repository configuration tasks
 - `install` - Package installation tasks
-- `packages` - Tasks related to installing prerequisite packages
-- `repositories` - Repository configuration tasks
-- `service` - Service startup configuration tasks
-- `logging` - Logging configuration tasks
-- `configure` - Tailscale configuration tasks
-- `auth` - Authentication and network joining tasks
+- `configure` - Service and role configuration tasks
+- `logrotate` - Logrotate-specific configuration tasks
 
 ## Example Playbook
 

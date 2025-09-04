@@ -21,13 +21,13 @@
 # -----------------------------------------------------------------------------
 # 1. Pre-Installation Validation
 # -----------------------------------------------------------------------------
-- name: 🔍 Tailscale | install | Check if Tailscale is already installed
+- name: Tailscale | install | Check if Tailscale is already installed
   ansible.builtin.command: "tailscale version"
   register: _tailscale_existing_version
   failed_when: false
   changed_when: false
 
-- name: 📋 Tailscale | install | Display pre-installation status
+- name: Tailscale | install | Display pre-installation status
   ansible.builtin.debug:
     msg:
       - "📦 Tailscale Installation Status:"
@@ -39,7 +39,7 @@
 # -----------------------------------------------------------------------------
 # 2. Install Tailscale Package
 # -----------------------------------------------------------------------------
-- name: 📦 Tailscale | install | Install Tailscale package
+- name: Tailscale | install | Install Tailscale package
   become: true
   ansible.builtin.package:
     name: tailscale
@@ -53,18 +53,18 @@
 # -----------------------------------------------------------------------------
 # 3. Post-Installation Verification
 # -----------------------------------------------------------------------------
-- name: 🔍 Tailscale | install | Verify Tailscale installation
+- name: Tailscale | install | Verify Tailscale installation
   ansible.builtin.command: "tailscale version"
   register: _tailscale_installed_version
   changed_when: false
   failed_when: _tailscale_installed_version.rc != 0
 
-- name: 🔍 Tailscale | install | Check Tailscale daemon binary
+- name: Tailscale | install | Check Tailscale daemon binary
   ansible.builtin.stat:
     path: "/usr/sbin/tailscaled"
   register: _tailscale_daemon_binary
 
-- name: 🔍 Tailscale | install | Verify tailscale binary permissions
+- name: Tailscale | install | Verify tailscale binary permissions
   ansible.builtin.stat:
     path: "/usr/bin/tailscale"
   register: _tailscale_client_binary
@@ -72,7 +72,7 @@
 # -----------------------------------------------------------------------------
 # 4. Installation Summary
 # -----------------------------------------------------------------------------
-- name: 📊 Tailscale | install | Report installation results
+- name: Tailscale | install | Report installation results
   ansible.builtin.debug:
     msg:
       - "✅ Tailscale Installation Completed Successfully:"
@@ -85,7 +85,7 @@
   when: >
     tailscale_collect_system_info | bool
 
-- name: 📊 Tailscale | install | Store installation information
+- name: Tailscale | install | Store installation information
   ansible.builtin.set_fact:
     tailscale_installation_info:
       version: "{{ _tailscale_installed_version.stdout }}"
@@ -103,7 +103,7 @@
 # -----------------------------------------------------------------------------
 # 5. Error Handling
 # -----------------------------------------------------------------------------
-- name: 🚨 Tailscale | install | Handle installation errors
+- name: Tailscale | install | Handle installation errors
   ansible.builtin.include_tasks: error_reporting.yml
   when: >
     tailscale_enhanced_error_reporting | bool and

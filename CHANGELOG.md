@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2025-09-04
+
+### Changed 🔄
+- Standardized all task names to convention: `Tailscale | section | description` (removed emojis from task names)
+- Converted all `when:` clauses to folded style for consistency
+- Corrected tags in `tasks/main.yml` to allowed set (`requirements`, `configure`)
+- Added template validation for rsyslog, systemd override, and logrotate
+
+### Documentation 📝
+- Updated README tags list to allowed tags and usage
+- Added `tailscale_state` to variables table and clarified “Service State and Configuration”
+
+### Quality Improvements 📈
+- Expanded variable assertions in `tasks/assert.yml` (service state, install method, apt key type, validation and logging flags, logrotate structure)
+
 ## [1.2.0] - 2025-08-11
 
 ### Changed 🔄
