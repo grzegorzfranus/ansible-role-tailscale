@@ -23,7 +23,7 @@
   ansible.builtin.set_fact:
     _tailscale_service_manager: >-
       {%- if tailscale_service_manager == 'auto' -%}
-        {{ ansible_service_mgr }}
+        {{ ansible_facts['service_mgr'] }}
       {%- else -%}
         {{ tailscale_service_manager }}
       {%- endif -%}
@@ -66,7 +66,7 @@
 
 - name: Tailscale | service | Log immediate start action
   ansible.builtin.debug:
-    msg: "🚀 Started {{ tailscale_service_name }} immediately due to distribution requirements ({{ ansible_distribution }})"
+    msg: "🚀 Started {{ tailscale_service_name }} immediately due to distribution requirements ({{ ansible_facts['distribution'] }})"
   when: >
     _tailscale_detected_immediate_start | bool and
     tailscale_service_enabled | bool

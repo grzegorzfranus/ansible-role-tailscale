@@ -34,7 +34,7 @@
       - "   Currently Installed: {{ 'Yes - ' + _tailscale_existing_version.stdout if _tailscale_existing_version.rc == 0 else 'No' }}"
       - "   Installation Method: {{ tailscale_install_method }}"
       - "   Track: {{ tailscale_track }}"
-      - "   Package Manager: {{ ansible_pkg_mgr }}"
+      - "   Package Manager: {{ ansible_facts['pkg_mgr'] }}"
 
 # -----------------------------------------------------------------------------
 # 2. Install Tailscale Package
@@ -96,7 +96,7 @@
       daemon_binary_exists: "{{ _tailscale_daemon_binary.stat.exists }}"
       installation_method: "{{ tailscale_install_method }}"
       track: "{{ tailscale_track }}"
-      timestamp: "{{ ansible_date_time.iso8601 }}"
+      timestamp: "{{ ansible_facts['date_time'].iso8601 }}"
   when: >
     tailscale_collect_system_info | bool
 

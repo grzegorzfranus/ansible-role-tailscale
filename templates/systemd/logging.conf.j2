@@ -2,8 +2,8 @@
 {{ ansible_managed | comment }}
 
 [Service]
-StandardOutput=syslog
-StandardError=syslog
+StandardOutput=journal
+StandardError=journal
 SyslogIdentifier={{ tailscale_syslog_identifier }}
 
 

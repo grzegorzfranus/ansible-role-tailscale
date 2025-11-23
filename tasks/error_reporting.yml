@@ -22,7 +22,7 @@
 - name: Tailscale | error | Collect current error context
   ansible.builtin.set_fact:
     _tailscale_error_report:
-      report_timestamp: "{{ ansible_date_time.iso8601 }}"
+      report_timestamp: "{{ ansible_facts['date_time'].iso8601 }}"
       role_version: "{{ _tailscale_diagnostic_info.role_version }}"
       failed_task: "{{ ansible_failed_task.name | default('Unknown task') }}"
       error_message: "{{ ansible_failed_result.msg | default('No error message available') }}"
@@ -37,31 +37,31 @@
     _tailscale_system_diagnostics:
       # Operating System Information
       os_info:
-        distribution: "{{ ansible_distribution }}"
-        version: "{{ ansible_distribution_version }}"
-        codename: "{{ ansible_distribution_release }}"
-        major_version: "{{ ansible_distribution_major_version }}"
-        os_family: "{{ ansible_os_family }}"
-        kernel: "{{ ansible_kernel }}"
-        architecture: "{{ ansible_architecture }}"
+        distribution: "{{ ansible_facts['distribution'] }}"
+        version: "{{ ansible_facts['distribution_version'] }}"
+        codename: "{{ ansible_facts['distribution_release'] }}"
+        major_version: "{{ ansible_facts['distribution_major_version'] }}"
+        os_family: "{{ ansible_facts['os_family'] }}"
+        kernel: "{{ ansible_facts['kernel'] }}"
+        architecture: "{{ ansible_facts['architecture'] }}"
 
       # Hardware Information
       hardware_info:
-        memory_total_mb: "{{ ansible_memtotal_mb | default('unknown') }}"
-        memory_free_mb: "{{ ansible_memfree_mb | default('unknown') }}"
-        cpu_cores: "{{ ansible_processor_vcpus | default('unknown') }}"
-        cpu_model: "{{ ansible_processor[2] | default('unknown') }}"
-        virtualization_type: "{{ ansible_virtualization_type | default('physical') }}"
-        virtualization_role: "{{ ansible_virtualization_role | default('host') }}"
+        memory_total_mb: "{{ ansible_facts['memtotal_mb'] | default('unknown') }}"
+        memory_free_mb: "{{ ansible_facts['memfree_mb'] | default('unknown') }}"
+        cpu_cores: "{{ ansible_facts['processor_vcpus'] | default('unknown') }}"
+        cpu_model: "{{ ansible_facts['processor'][2] | default('unknown') }}"
+        virtualization_type: "{{ ansible_facts['virtualization_type'] | default('physical') }}"
+        virtualization_role: "{{ ansible_facts['virtualization_role'] | default('host') }}"
 
       # System Configuration
       system_config:
-        hostname: "{{ ansible_hostname }}"
-        fqdn: "{{ ansible_fqdn }}"
-        timezone: "{{ ansible_date_time.tz }}"
-        uptime_seconds: "{{ ansible_uptime_seconds | default('unknown') }}"
-        selinux_status: "{{ ansible_selinux.status | default('unknown') }}"
-        python_version: "{{ ansible_python_version }}"
+        hostname: "{{ ansible_facts['hostname'] }}"
+        fqdn: "{{ ansible_facts['fqdn'] }}"
+        timezone: "{{ ansible_facts['date_time'].tz }}"
+        uptime_seconds: "{{ ansible_facts['uptime_seconds'] | default('unknown') }}"
+        selinux_status: "{{ ansible_facts['selinux'].status | default('unknown') }}"
+        python_version: "{{ ansible_facts['python_version'] }}"
 
       # Detected Configuration
       detected_config:
@@ -74,7 +74,7 @@
 - name: Tailscale | error | Collect package manager information
   ansible.builtin.set_fact:
     _tailscale_package_diagnostics:
-      package_manager: "{{ ansible_pkg_mgr }}"
+      package_manager: "{{ ansible_facts['pkg_mgr'] }}"
       package_manager_available: "{{ _tailscale_pkg_mgr_check.rc == 0 if _tailscale_pkg_mgr_check is defined else 'unknown' }}"
       prerequisites_status: "{{ _tailscale_pkg_test.changed if _tailscale_pkg_test is defined else 'unknown' }}"
   when: >
@@ -88,7 +88,7 @@
   failed_when: false
   when: >
     tailscale_include_package_info | bool and
-    ansible_pkg_mgr == 'apt'
+    ansible_facts['pkg_mgr'] == 'apt'
 
 - name: Tailscale | error | Check GPG keys
   ansible.builtin.find:
@@ -98,7 +98,7 @@
   failed_when: false
   when: >
     tailscale_include_package_info | bool and
-    ansible_pkg_mgr == 'apt'
+    ansible_facts['pkg_mgr'] == 'apt'
 
 # -----------------------------------------------------------------------------
 # 4. Network Configuration Details
@@ -135,7 +135,7 @@
   register: _tailscale_service_status
   failed_when: false
   when: >
-    ansible_service_mgr == 'systemd'
+    ansible_facts['service_mgr'] == 'systemd'
 
 - name: Tailscale | error | Check if Tailscale binary exists
   ansible.builtin.stat:
@@ -159,7 +159,7 @@
   failed_when: false
   changed_when: false
   when: >
-    ansible_service_mgr == 'systemd' and
+    ansible_facts['service_mgr'] == 'systemd' and
     tailscale_error_log_lines > 0
 
 - name: Tailscale | error | Collect system logs
@@ -169,7 +169,7 @@
   changed_when: false
   when: >
     tailscale_error_log_lines > 0 and
-    ansible_os_family == 'Debian'
+    ansible_facts['os_family'] == 'Debian'
 
 # -----------------------------------------------------------------------------
 # 7. Error Report Generation
@@ -246,7 +246,7 @@
 - name: Tailscale | error | Save error report to file
   ansible.builtin.copy:
     content: "{{ tailscale_error_report | to_nice_yaml }}"
-    dest: "/tmp/tailscale-role-error-{{ ansible_date_time.epoch }}.yaml"
+    dest: "/tmp/tailscale-role-error-{{ ansible_facts['date_time'].epoch }}.yaml"
     mode: '0644'
   delegate_to: localhost
   when: >

@@ -60,7 +60,7 @@
 - name: Tailscale | repository | Configure apt repository
   become: true
   ansible.builtin.apt_repository:
-    repo: "deb [signed-by={{ tailscale_repo_key_path }}] https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_distribution | lower }} {{ _tailscale_version_codename }} main"
+    repo: "deb [signed-by={{ tailscale_repo_key_path }}] https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_facts['distribution'] | lower }} {{ _tailscale_version_codename }} main"
     filename: tailscale
     state: present
   register: _tailscale_repo_added

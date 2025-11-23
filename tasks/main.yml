@@ -79,10 +79,10 @@
 - name: Tailscale | assert | Check if OS is supported
   ansible.builtin.assert:
     that:
-      - (ansible_distribution == 'Ubuntu' and ansible_distribution_version == '24.04') or
-        (ansible_distribution == 'Debian' and ansible_distribution_major_version == '12')
+      - (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_version'] == '24.04') or
+        (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] == '12')
     fail_msg: "This role only supports Ubuntu 24.04 and Debian 12"
-    success_msg: "Running on supported OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+    success_msg: "Running on supported OS: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
   tags:
     - always
     - setup

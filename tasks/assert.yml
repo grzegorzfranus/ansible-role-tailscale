@@ -149,8 +149,8 @@
 - name: Tailscale | assert | Validate extra arguments content
   ansible.builtin.assert:
     that:
-      - tailscale_extra_args is match("^[a-zA-Z0-9=._\\-]*$") or tailscale_extra_args == ""
-    fail_msg: "❌ Invalid extra arguments content '{{ tailscale_extra_args }}'. Must contain only safe characters (alphanumeric, equals, dot, underscore, hyphen) or be empty"
+      - tailscale_extra_args is match("^[a-zA-Z0-9=._\\-\\s/:\\[\\]]*$") or tailscale_extra_args == ""
+    fail_msg: "❌ Invalid extra arguments content '{{ tailscale_extra_args }}'. Must contain only safe characters (alphanumeric, equals, dot, underscore, hyphen, spaces, forward slash, colon, brackets) or be empty"
     success_msg: "✅ Extra arguments content is valid: {{ tailscale_extra_args }}"
 
 # -----------------------------------------------------------------------------

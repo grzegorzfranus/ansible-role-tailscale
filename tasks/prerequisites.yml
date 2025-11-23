@@ -33,7 +33,7 @@
     msg:
       - "📦 Installing Tailscale Prerequisites:"
       - "   Packages: {{ tailscale_prerequisites | join(', ') }}"
-      - "   Package Manager: {{ ansible_pkg_mgr }}"
+      - "   Package Manager: {{ ansible_facts['pkg_mgr'] }}"
       - "   Total Count: {{ tailscale_prerequisites | length }}"
 
 # -----------------------------------------------------------------------------
@@ -46,7 +46,7 @@
   register: _tailscale_cache_update_result
   failed_when: false
   when: >
-    ansible_pkg_mgr in ['apt', 'yum', 'dnf', 'zypper']
+    ansible_facts['pkg_mgr'] in ['apt', 'yum', 'dnf', 'zypper']
   retries: 3
   delay: 5
 
@@ -81,7 +81,7 @@
     msg:
       - "✅ Prerequisites Installation Completed:"
       - "   Successfully Installed: {{ tailscale_prerequisites | length }} packages"
-      - "   Package Manager: {{ ansible_pkg_mgr }}"
+      - "   Package Manager: {{ ansible_facts['pkg_mgr'] }}"
       - "   Cache Updated: {{ 'Yes' if _tailscale_cache_update_result is defined and _tailscale_cache_update_result.changed else 'Skipped' }}"
   when: >
     tailscale_collect_system_info | bool

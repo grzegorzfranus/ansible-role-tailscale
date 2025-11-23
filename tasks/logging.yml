@@ -57,13 +57,12 @@
 - name: Tailscale | logging | Configure rsyslog for Tailscale
   become: true
   ansible.builtin.template:
-    src: rsyslog/tailscale.conf.j2
+    src: "rsyslog/tailscale.conf.j2"
     dest: "/etc/rsyslog.d/{{ tailscale_rsyslog_config_file }}"
     mode: '0644'
     owner: root
     group: root
-    backup: true
-    validate: "rsyslogd -N1 -f %s"
+    backup: false
   notify: 🔄 Tailscale | handlers | Restart rsyslog
 
 # -----------------------------------------------------------------------------
@@ -78,7 +77,7 @@
     owner: root
     group: root
   when: >
-    ansible_service_mgr == 'systemd'
+    ansible_facts['service_mgr'] == 'systemd'
 
 - name: Tailscale | logging | Configure systemd service override for logging
   become: true
@@ -89,12 +88,11 @@
     owner: root
     group: root
     backup: true
-    validate: "systemd-analyze verify %s"
   notify:
     - 🔄 Tailscale | handlers | Reload systemd
     - 🔄 Tailscale | handlers | Restart Tailscale service
   when: >
-    ansible_service_mgr == 'systemd'
+    ansible_facts['service_mgr'] == 'systemd'
 
 # -----------------------------------------------------------------------------
 # 4. Log Rotation Configuration

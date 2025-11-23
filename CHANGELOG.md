@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2025-11-23
+
+### Fixed 🔧
+- Fixed compatibility issue with Ansible 2.20+ that caused "Recursive loop detected in template" error in variable validation
+- Removed redundant `tailscale_auth_key` variable assignment in example playbook that created circular reference
+- Enhanced variable handling to prevent template recursion errors in assertion tasks
+- Fixed `tailscale_extra_args` validation regex to allow spaces and additional command-line characters (spaces, forward slash, colon, brackets)
+- Updated regex pattern from `^[a-zA-Z0-9=._\\-]*$` to `^[a-zA-Z0-9=._\\-\\s/:\\[\\]]*$` for proper multi-flag argument validation
+- **Replaced all deprecated `ansible_*` facts with `ansible_facts['fact_name']` format** to eliminate deprecation warnings and prepare for Ansible 2.24+
+- Removed invalid `systemd-analyze verify` validation from systemd drop-in configuration file deployment (systemd-analyze only works with full .service files, not drop-in overrides)
+- Updated systemd service override template to use `StandardOutput=journal` instead of obsolete `StandardOutput=syslog` to eliminate systemd deprecation warnings
+
+### Compatibility 🔄
+- Verified full compatibility with Ansible 2.20 and newer versions
+- Maintained backward compatibility with Ansible 2.15+
+- Prepared for Ansible 2.24 by migrating away from deprecated `INJECT_FACTS_AS_VARS` behavior
+- All role tasks now use modern `ansible_facts` dictionary format instead of top-level injected variables
+
+### Validation Improvements 📈
+- Enhanced `tailscale_extra_args` validation to support complex command-line arguments with multiple flags separated by spaces
+- Examples now supported: `--hostname=server.example.com --accept-routes --accept-dns=false`
+
+### Code Quality 🎯
+- Systematic migration of 60+ instances of deprecated fact variables across all task files
+- Updated variable references in: `main.yml`, `validate.yml`, `error_reporting.yml`, `service.yml`, `repository.yml`, `remove.yml`, `logging.yml`, `prerequisites.yml`, `install.yml`, and `vars/main.yml`
+- No deprecation warnings when running with Ansible 2.20+
+- **Important**: Only setup module facts migrated to `ansible_facts` dictionary; special Ansible variables (`ansible_version`, `ansible_connection`, `ansible_check_mode`, `inventory_hostname`, `playbook_dir`) remain as top-level variables per Ansible design
+
 ## [1.2.1] - 2025-09-04
 
 ### Changed 🔄

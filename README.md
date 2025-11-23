@@ -56,6 +56,10 @@ List of officially supported operating systems for this role:
 
 Ansible >= 2.15
 
+**Compatibility Notes**:
+- Fully tested with Ansible 2.15 through 2.20+
+- Version 1.2.2+ includes compatibility fixes for Ansible 2.20's stricter variable recursion detection
+
 ### Python version
 
 Python >= 3.9
@@ -194,7 +198,7 @@ With this configuration, Tailscale logs will be directed to `/var/log/tailscale/
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `tailscale_auth_key` | Authentication key for connecting to Tailscale network. Generate from the [Tailscale admin console](https://login.tailscale.com/admin/authkeys). | `""` |
-| `tailscale_extra_args` | Additional arguments for the `tailscale up` command. Useful for configuring hostname, enabling exit nodes, etc. | `""` |
+| `tailscale_extra_args` | Additional arguments for the `tailscale up` command. Supports multiple flags separated by spaces (e.g., `--hostname=server --accept-routes --accept-dns=false`). Useful for configuring hostname, enabling exit nodes, subnet routes, etc. | `""` |
 
 ### Installation Settings
 
@@ -426,6 +430,52 @@ ls -l /usr/share/keyrings/tailscale-archive-keyring.gpg
 sudo apt update
 sudo apt install tailscale
 ```
+
+### Ansible 2.20+ Compatibility
+
+**Issue**: Recursive loop error with Ansible 2.20+
+
+If you encounter the error `Recursive loop detected in template: maximum recursion depth exceeded` when using Ansible 2.20 or newer, this is caused by circular variable references.
+
+**❌ Incorrect Usage (causes recursion):**
+```yaml
+- hosts: all
+  vars:
+    tailscale_auth_key: "your-auth-key"
+  tasks:
+    - ansible.builtin.include_role:
+        name: ansible-role-tailscale
+      vars:
+        tailscale_auth_key: "{{ tailscale_auth_key }}"  # ❌ Circular reference!
+```
+
+**✅ Correct Usage (fixed in v1.2.2):**
+```yaml
+- hosts: all
+  vars:
+    tailscale_auth_key: "your-auth-key"
+  tasks:
+    - ansible.builtin.include_role:
+        name: ansible-role-tailscale
+      # No need to redefine tailscale_auth_key - it inherits from play vars
+```
+
+**Alternative: Define variables only at role level**
+```yaml
+- hosts: all
+  tasks:
+    - ansible.builtin.include_role:
+        name: ansible-role-tailscale
+      vars:
+        tailscale_auth_key: "your-auth-key"
+        tailscale_extra_args: "--accept-routes"
+```
+
+**Best Practice**: Avoid redefining the same variable at multiple scopes. Variables defined at play level are automatically inherited by included roles.
+
+**Version Compatibility**:
+- ✅ Ansible 2.15 - 2.19: Works with both patterns
+- ✅ Ansible 2.20+: Requires correct pattern (fixed in role v1.2.2)
 
 ## 📁 File Structure
 
