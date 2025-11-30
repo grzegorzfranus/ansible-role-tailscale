@@ -12,20 +12,20 @@
 # -----------------------------------------------------------------------------
 # Service Handlers
 # -----------------------------------------------------------------------------
-- name: 🔄 Tailscale | handlers | Restart Tailscale service
+- name: Tailscale | handlers | Restart Tailscale service
   become: true
   ansible.builtin.service:
     name: "{{ tailscale_service_name }}"
     state: restarted
 
-- name: 🔄 Tailscale | handlers | Reload systemd
+- name: Tailscale | handlers | Reload systemd
   become: true
   ansible.builtin.systemd:
     daemon_reload: true
   when: >
-    ansible_service_mgr == 'systemd'
+    ansible_facts['service_mgr'] == 'systemd'
 
-- name: 🔄 Tailscale | handlers | Restart rsyslog
+- name: Tailscale | handlers | Restart rsyslog
   become: true
   ansible.builtin.service:
     name: rsyslog

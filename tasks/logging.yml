@@ -63,7 +63,7 @@
     owner: root
     group: root
     backup: false
-  notify: 🔄 Tailscale | handlers | Restart rsyslog
+  notify: Tailscale | handlers | Restart rsyslog
 
 # -----------------------------------------------------------------------------
 # 3. Systemd Service Override Configuration
@@ -89,8 +89,8 @@
     group: root
     backup: true
   notify:
-    - 🔄 Tailscale | handlers | Reload systemd
-    - 🔄 Tailscale | handlers | Restart Tailscale service
+    - Tailscale | handlers | Reload systemd
+    - Tailscale | handlers | Restart Tailscale service
   when: >
     ansible_facts['service_mgr'] == 'systemd'
 

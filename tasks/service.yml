@@ -46,7 +46,7 @@
     name: "{{ tailscale_service_name }}"
     enabled: "{{ tailscale_service_enabled }}"
     daemon_reload: true
-  notify: 🔄 Tailscale | handlers | Restart Tailscale service
+  notify: Tailscale | handlers | Restart Tailscale service
   when: >
     _tailscale_service_manager == 'systemd'
 

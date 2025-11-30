@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.3] - 2025-11-30
+
+### Fixed 🔧
+- Removed emojis from handler names for cleaner output and better compatibility
+- Fixed deprecated `ansible_service_mgr` in handler condition, replaced with `ansible_facts['service_mgr']`
+- Updated all `notify` references in `tasks/logging.yml` and `tasks/service.yml` to match handler names without emojis
+
+### Changed 🔄
+- Handler names now follow consistent format without emoji prefixes: `Tailscale | handlers | <action>`
+
 ## [1.2.2] - 2025-11-23
 
 ### Fixed 🔧
