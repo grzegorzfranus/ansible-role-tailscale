@@ -7,6 +7,7 @@
 #
 # Supported OS distributions:
 # - Ubuntu 24.04 (Noble) and variants
+# - Debian 13 (Trixie) and variants
 # - Debian 12 (Bookworm) and variants
 #
 # Sections:

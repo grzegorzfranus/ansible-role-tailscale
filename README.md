@@ -47,9 +47,11 @@ Device A ←→ Device B ←→ Device C
 
 ### Supported operating systems
 List of officially supported operating systems for this role:
+
 | OS Family | Version | Status |
 |-----------|---------|---------|
 | Ubuntu | 24.04 (Noble) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
+| Debian | 13 (Trixie)   | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Debian | 12 (Bookworm) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 
 ### Ansible version
