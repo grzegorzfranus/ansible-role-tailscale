@@ -80,8 +80,9 @@
   ansible.builtin.assert:
     that:
       - (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_version'] == '24.04') or
+        (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] == '13') or
         (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] == '12')
-    fail_msg: "This role only supports Ubuntu 24.04 and Debian 12"
+    fail_msg: "This role only supports Ubuntu 24.04 and Debian 13/12"
     success_msg: "Running on supported OS: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
   tags:
     - always

@@ -44,6 +44,8 @@ jobs:
           - scenario: default
             distro: ubuntu2404
           - scenario: default
+            distro: debian13
+          - scenario: default
             distro: debian12
 
     steps:
