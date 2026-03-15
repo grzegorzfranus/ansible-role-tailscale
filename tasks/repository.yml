@@ -68,10 +68,6 @@
 # -----------------------------------------------------------------------------
 # 4. Update Package Cache
 # -----------------------------------------------------------------------------
-
-# -----------------------------------------------------------------------------
-# 5. Update Package Cache
-# -----------------------------------------------------------------------------
 - name: Tailscale | repository | Update package cache
   become: true
   ansible.builtin.apt:
@@ -85,7 +81,7 @@
     not ansible_check_mode
 
 # -----------------------------------------------------------------------------
-# 6. Verification
+# 5. Verification
 # -----------------------------------------------------------------------------
 - name: Tailscale | repository | Verify repository configuration
   ansible.builtin.command: "apt-cache policy tailscale"

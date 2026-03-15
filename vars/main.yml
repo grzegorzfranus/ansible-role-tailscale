@@ -79,11 +79,6 @@ _tailscale_supported_architectures:
 # Supported package managers
 _tailscale_supported_package_managers:
   - "apt"
-  - "yum"
-  - "dnf"
-  - "zypper"
-  - "pacman"
-  - "apk"
 
 # -----------------------------------------------------------------------------
 # 5. Error Reporting Data Collection
