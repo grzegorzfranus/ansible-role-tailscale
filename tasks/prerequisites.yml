@@ -37,20 +37,6 @@
       - "   Total Count: {{ tailscale_prerequisites | length }}"
 
 # -----------------------------------------------------------------------------
-# 2. Update Package Cache (if needed)
-# -----------------------------------------------------------------------------
-- name: Tailscale | prerequisites | Update package cache before installation
-  become: true
-  ansible.builtin.package:
-    update_cache: true
-  register: _tailscale_cache_update_result
-  failed_when: false
-  when: >
-    ansible_facts['pkg_mgr'] in ['apt', 'yum', 'dnf', 'zypper']
-  retries: 3
-  delay: 5
-
-# -----------------------------------------------------------------------------
 # 3. Install Required Packages
 # -----------------------------------------------------------------------------
 - name: Tailscale | prerequisites | Install required packages
@@ -82,7 +68,7 @@
       - "✅ Prerequisites Installation Completed:"
       - "   Successfully Installed: {{ tailscale_prerequisites | length }} packages"
       - "   Package Manager: {{ ansible_facts['pkg_mgr'] }}"
-      - "   Cache Updated: {{ 'Yes' if _tailscale_cache_update_result is defined and _tailscale_cache_update_result.changed else 'Skipped' }}"
+      - "   Cache Updated: As part of package installation"
   when: >
     tailscale_collect_system_info | bool
 

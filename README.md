@@ -40,7 +40,7 @@ Device A ←→ Device B ←→ Device C
 
 ## 📋 Requirements
 
-- **Ansible**: 2.15 or higher
+- **Ansible**: 2.16 or higher
 - **Network**: Internet access for Tailscale coordination server
 - **Privileges**: sudo/root access on target hosts
 - **Account**: Active Tailscale account with auth keys
@@ -56,10 +56,10 @@ List of officially supported operating systems for this role:
 
 ### Ansible version
 
-Ansible >= 2.15
+Ansible >= 2.16
 
 **Compatibility Notes**:
-- Fully tested with Ansible 2.15 through 2.20+
+- Fully tested with Ansible 2.16 through 2.20+
 - Version 1.2.2+ includes compatibility fixes for Ansible 2.20's stricter variable recursion detection
 
 ### Python version
@@ -496,7 +496,17 @@ ansible-role-tailscale/
 ├── meta/
 │   └── main.yml             # Role metadata and Galaxy information
 ├── molecule/                 # Molecule testing framework
-│   └── default/             # Default test scenario
+│   ├── default/             # Default test scenario
+│   │   ├── molecule.yml     # Test configuration
+│   │   ├── converge.yml     # Role execution playbook
+│   │   ├── prepare.yml      # Test preparation tasks
+│   │   └── verify.yml       # Verification tests
+│   ├── logging/             # Logging scenario
+│   │   ├── molecule.yml     # Test configuration
+│   │   ├── converge.yml     # Role execution playbook
+│   │   ├── prepare.yml      # Test preparation tasks
+│   │   └── verify.yml       # Verification tests
+│   └── uninstall/           # Uninstall scenario
 │       ├── molecule.yml     # Test configuration
 │       ├── converge.yml     # Role execution playbook
 │       ├── prepare.yml      # Test preparation tasks
@@ -510,15 +520,19 @@ ansible-role-tailscale/
 │   ├── service.yml          # Service management
 │   ├── validate.yml         # System validation and diagnostics
 │   ├── logging.yml          # Dedicated logging configuration
-│   └── error_reporting.yml  # Enhanced error reporting
+│   ├── error_reporting.yml  # Enhanced error reporting
+│   └── remove.yml           # Role removal tasks
 ├── templates/               # Configuration templates
 │   ├── rsyslog/            # RSyslog configuration files
 │   │   └── tailscale.conf.j2 # Tailscale rsyslog configuration
-│   └── logrotate/          # Logrotate configuration files
-│       └── tailscale.j2    # Tailscale log rotation settings
+│   ├── logrotate/          # Logrotate configuration files
+│   │   └── tailscale.j2    # Tailscale log rotation settings
+│   └── systemd/            # Systemd configuration files
+│       └── logging.conf.j2 # Tailscale systemd logging override
 └── vars/
     ├── main.yml             # Internal role variables
     ├── debian_12.yml        # Debian 12 specific variables
+    ├── debian_13.yml        # Debian 13 specific variables
     └── ubuntu_24.04.yml     # Ubuntu 24.04 specific variables
 ```
 

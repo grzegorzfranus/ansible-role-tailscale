@@ -63,7 +63,7 @@ tailscale_apt_key_type: "auto"
 tailscale_install_method: "package"
 
 # -----------------------------------------------------------------------------
-# 3. Service State (Lifecycle)
+# 2.5. Service State (Lifecycle)
 # -----------------------------------------------------------------------------
 # Control overall role behavior: install or uninstall
 tailscale_state: "present"

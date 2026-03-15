@@ -5,10 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.3.0] - 2026-03-15
 
-### Compatibility 🔄
+### Fixed 🔧
+- Fixed duplicate section "3." numbering in `defaults/main.yml`
+- Fixed section numbering sequence in `tasks/repository.yml`
+- Removed dead OpenRC code and undefined variable references in `tasks/service.yml`
+- Removed unsupported package managers from `_tailscale_supported_package_managers` list in `vars/main.yml`
+- Removed redundant cache update task in `tasks/prerequisites.yml`
+- Fixed incomplete file structure diagram in `README.md`
+- Updated default testing image to `ubuntu2404` in `molecule/default/molecule.yml` to prevent failing on unsupported OS checks
+
+### Changed 🔄
 - Added support for Debian 13 (Trixie)
+- Bumped `min_ansible_version` to "2.16" in `meta/main.yml`
 
 ## [1.2.3] - 2025-11-30
 
