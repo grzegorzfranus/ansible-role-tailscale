@@ -1,113 +1,76 @@
 ---
-# =============================================================================
-# Ansible Role: Tailscale - Installation Tasks
-# =============================================================================
-# This file handles the installation of the Tailscale package on the target system.
-# It ensures that the proper version of the software is installed after
-# prerequisites are met and repositories are configured, with enhanced validation
-# and error reporting capabilities.
-#
-# Flow:
-# 1. Pre-Installation Validation
-# 2. Install Tailscale Package
-# 3. Post-Installation Verification
-# 4. Installation Summary
-# 5. Error Handling
-#
-# The role uses the generic package module to be compatible with various
-# package managers across different Linux distributions.
-# =============================================================================
+# Tailscale Install — Install the Tailscale package and verify binaries.
 
-# -----------------------------------------------------------------------------
-# 1. Pre-Installation Validation
-# -----------------------------------------------------------------------------
 - name: Tailscale | install | Check if Tailscale is already installed
   ansible.builtin.command: "tailscale version"
-  register: _tailscale_existing_version
+  register: __tailscale_existing_version
   failed_when: false
   changed_when: false
 
 - name: Tailscale | install | Display pre-installation status
   ansible.builtin.debug:
     msg:
-      - "📦 Tailscale Installation Status:"
-      - "   Currently Installed: {{ 'Yes - ' + _tailscale_existing_version.stdout if _tailscale_existing_version.rc == 0 else 'No' }}"
-      - "   Installation Method: {{ tailscale_install_method }}"
-      - "   Track: {{ tailscale_track }}"
-      - "   Package Manager: {{ ansible_facts['pkg_mgr'] }}"
+      - "Currently Installed: {{ 'Yes - ' + __tailscale_existing_version.stdout if __tailscale_existing_version.rc == 0 else 'No' }}"
+      - "   Method: {{ tailscale_install_method }} | Track: {{ tailscale_track }}"
+    verbosity: 1
 
-# -----------------------------------------------------------------------------
-# 2. Install Tailscale Package
-# -----------------------------------------------------------------------------
 - name: Tailscale | install | Install Tailscale package
   become: true
   ansible.builtin.package:
     name: tailscale
     state: present
     update_cache: true
-  register: _tailscale_installation_result
-  until: _tailscale_installation_result is succeeded
+  register: __tailscale_installation_result
+  until: __tailscale_installation_result is succeeded
   retries: 3
   delay: 10
 
-# -----------------------------------------------------------------------------
-# 3. Post-Installation Verification
-# -----------------------------------------------------------------------------
 - name: Tailscale | install | Verify Tailscale installation
   ansible.builtin.command: "tailscale version"
-  register: _tailscale_installed_version
+  register: __tailscale_installed_version
   changed_when: false
-  failed_when: _tailscale_installed_version.rc != 0
+  failed_when: __tailscale_installed_version.rc != 0
 
 - name: Tailscale | install | Check Tailscale daemon binary
   ansible.builtin.stat:
     path: "/usr/sbin/tailscaled"
-  register: _tailscale_daemon_binary
+  register: __tailscale_daemon_binary
 
 - name: Tailscale | install | Verify tailscale binary permissions
   ansible.builtin.stat:
     path: "/usr/bin/tailscale"
-  register: _tailscale_client_binary
+  register: __tailscale_client_binary
 
-# -----------------------------------------------------------------------------
-# 4. Installation Summary
-# -----------------------------------------------------------------------------
 - name: Tailscale | install | Report installation results
   ansible.builtin.debug:
     msg:
-      - "✅ Tailscale Installation Completed Successfully:"
-      - "   Installed Version: {{ _tailscale_installed_version.stdout }}"
-      - "   Client Binary: {{ '/usr/bin/tailscale' if _tailscale_client_binary.stat.exists else 'NOT FOUND' }}"
-      - "   Daemon Binary: {{ '/usr/sbin/tailscaled' if _tailscale_daemon_binary.stat.exists else 'NOT FOUND' }}"
-      - "   Installation Changed: {{ 'Yes' if _tailscale_installation_result.changed else 'No (already installed)' }}"
-      - "   Track Used: {{ tailscale_track }}"
-      - "   Package Manager: {{ ansible_pkg_mgr }}"
-  when: >
-    tailscale_collect_system_info | bool
+      - "Tailscale {{ __tailscale_installed_version.stdout }} installed"
+      - "   Changed: {{ 'Yes' if __tailscale_installation_result.changed else 'No (already installed)' }}"
+    verbosity: 1
+  when:
+    - tailscale_collect_system_info | bool
 
 - name: Tailscale | install | Store installation information
   ansible.builtin.set_fact:
-    tailscale_installation_info:
-      version: "{{ _tailscale_installed_version.stdout }}"
-      installation_changed: "{{ _tailscale_installation_result.changed }}"
+    __tailscale_installation_info:
+      version: "{{ __tailscale_installed_version.stdout }}"
+      installation_changed: "{{ __tailscale_installation_result.changed }}"
       client_binary_path: "/usr/bin/tailscale"
       daemon_binary_path: "/usr/sbin/tailscaled"
-      client_binary_exists: "{{ _tailscale_client_binary.stat.exists }}"
-      daemon_binary_exists: "{{ _tailscale_daemon_binary.stat.exists }}"
+      client_binary_exists: "{{ __tailscale_client_binary.stat.exists }}"
+      daemon_binary_exists: "{{ __tailscale_daemon_binary.stat.exists }}"
       installation_method: "{{ tailscale_install_method }}"
       track: "{{ tailscale_track }}"
       timestamp: "{{ ansible_facts['date_time'].iso8601 }}"
-  when: >
-    tailscale_collect_system_info | bool
+  when:
+    - tailscale_collect_system_info | bool
 
-# -----------------------------------------------------------------------------
-# 5. Error Handling
-# -----------------------------------------------------------------------------
 - name: Tailscale | install | Handle installation errors
   ansible.builtin.include_tasks: error_reporting.yml
-  when: >
-    tailscale_enhanced_error_reporting | bool and
-    ((_tailscale_installation_result is defined and _tailscale_installation_result.failed | default(false)) or
-     (_tailscale_installed_version is defined and _tailscale_installed_version.failed | default(false)) or
-     (not _tailscale_client_binary.stat.exists) or
-     (not _tailscale_daemon_binary.stat.exists))
+  when:
+    - tailscale_enhanced_error_reporting | bool
+    - >-
+      (__tailscale_installation_result is defined and __tailscale_installation_result.failed | default(false)) or
+      (__tailscale_installed_version is defined and __tailscale_installed_version.failed | default(false)) or
+      (not __tailscale_client_binary.stat.exists) or
+      (not __tailscale_daemon_binary.stat.exists)

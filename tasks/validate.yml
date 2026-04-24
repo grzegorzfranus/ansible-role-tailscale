@@ -1,97 +1,75 @@
 ---
-# =============================================================================
-# Ansible Role: Tailscale - System Validation Tasks
-# =============================================================================
-# This file performs comprehensive system validation based on the official
-# Tailscale installer script logic. It validates system requirements,
-# detects configuration parameters, and collects diagnostic information.
-#
-# Flow:
-# 1. Architecture and System Validation
-# 2. Package Manager Detection and Validation
-# 3. Smart GPG Key Method Detection
-# 4. Network Connectivity Validation
-# 5. System Information Collection
-# 6. Enhanced Error Reporting Setup
-# =============================================================================
+# Tailscale Validate — System validation, smart detection, and connectivity checks.
 
-# -----------------------------------------------------------------------------
-# 1. Architecture and System Validation
-# -----------------------------------------------------------------------------
 - name: Tailscale | validate | Check system architecture support
   ansible.builtin.assert:
     that:
-      - ansible_facts['architecture'] in _tailscale_supported_architectures
-    fail_msg: "❌ Unsupported architecture '{{ ansible_facts['architecture'] }}'. Supported: {{ _tailscale_supported_architectures | join(', ') }}"
-    success_msg: "✅ System architecture is supported: {{ ansible_facts['architecture'] }}"
-  when: >
-    tailscale_validate_prerequisites | bool
+      - ansible_facts['architecture'] in __tailscale_supported_architectures
+    fail_msg: "Unsupported architecture '{{ ansible_facts['architecture'] }}'. Supported: {{ __tailscale_supported_architectures | join(', ') }}"
+    success_msg: "Architecture supported: {{ ansible_facts['architecture'] }}"
+  when:
+    - tailscale_validate_prerequisites | bool
 
 - name: Tailscale | validate | Validate operating system support
   ansible.builtin.assert:
     that:
       - ansible_facts['os_family'] in ['Debian']
-    fail_msg: "❌ Unsupported OS family '{{ ansible_facts['os_family'] }}'. This role supports Debian-based distributions: Ubuntu 24.04 and Debian 12/13."
-    success_msg: "✅ Operating system family is supported: {{ ansible_facts['os_family'] }}"
-  when: >
-    tailscale_validate_prerequisites | bool
+    fail_msg: "Unsupported OS family '{{ ansible_facts['os_family'] }}'. Supported: Debian-based (Ubuntu 24.04, Debian 12/13)."
+    success_msg: "OS family supported: {{ ansible_facts['os_family'] }}"
+  when:
+    - tailscale_validate_prerequisites | bool
 
 - name: Tailscale | validate | Check distribution version support
   ansible.builtin.assert:
     that:
-      - (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_version'] == '24.04') or
+      - >-
+        (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_version'] == '24.04') or
         (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] == '13') or
         (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] == '12')
-    fail_msg: "❌ Unsupported distribution version: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}. Currently supported: Ubuntu 24.04, Debian 13/12"
-    success_msg: "✅ Distribution version is supported: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
-  when: >
-    tailscale_validate_prerequisites | bool
+    fail_msg: "Unsupported: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}. Supported: Ubuntu 24.04, Debian 12/13"
+    success_msg: "Distribution supported: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
+  when:
+    - tailscale_validate_prerequisites | bool
 
-# -----------------------------------------------------------------------------
-# 2. Package Manager Detection and Validation
-# -----------------------------------------------------------------------------
 - name: Tailscale | validate | Detect package manager availability
   ansible.builtin.command: "which {{ ansible_facts['pkg_mgr'] }}"
-  register: _tailscale_pkg_mgr_check
+  register: __tailscale_pkg_mgr_check
   failed_when: false
   changed_when: false
-  when: >
-    tailscale_validate_prerequisites | bool
+  when:
+    - tailscale_validate_prerequisites | bool
 
 - name: Tailscale | validate | Assert package manager is functional
   ansible.builtin.assert:
     that:
-      - _tailscale_pkg_mgr_check.rc == 0
-      - ansible_facts['pkg_mgr'] in _tailscale_supported_package_managers
-    fail_msg: "❌ Package manager '{{ ansible_facts['pkg_mgr'] }}' not found or not supported"
-    success_msg: "✅ Package manager is available and supported: {{ ansible_facts['pkg_mgr'] }}"
-  when: >
-    tailscale_validate_prerequisites | bool
+      - __tailscale_pkg_mgr_check.rc == 0
+      - ansible_facts['pkg_mgr'] in __tailscale_supported_package_managers
+    fail_msg: "Package manager '{{ ansible_facts['pkg_mgr'] }}' not found or not supported"
+    success_msg: "Package manager available: {{ ansible_facts['pkg_mgr'] }}"
+  when:
+    - tailscale_validate_prerequisites | bool
 
 - name: Tailscale | validate | Test package manager functionality
   ansible.builtin.package:
     name: "{{ tailscale_prerequisites[0] }}"
     state: present
   check_mode: true
-  register: _tailscale_pkg_test
+  register: __tailscale_pkg_test
   failed_when: false
-  when: >
-    tailscale_validate_prerequisites | bool
+  when:
+    - tailscale_validate_prerequisites | bool
 
-# -----------------------------------------------------------------------------
-# 3. Smart GPG Key Method Detection
-# -----------------------------------------------------------------------------
 - name: Tailscale | validate | Detect optimal GPG key management method
   ansible.builtin.set_fact:
-    _tailscale_detected_key_method: keyring
+    __tailscale_detected_key_method: keyring
 
 - name: Tailscale | validate | Detect version codename for repository URLs
   ansible.builtin.set_fact:
-    _tailscale_version_codename: "{{ ansible_facts['distribution_release'] }}"
+    __tailscale_version_codename: "{{ ansible_facts['distribution_release'] }}"
 
 - name: Tailscale | validate | Detect service startup requirements
   ansible.builtin.set_fact:
-    _tailscale_detected_immediate_start: >-
+    __tailscale_detected_immediate_start: >-
       {%- if tailscale_systemctl_start == 'auto' -%}
       {%- if ansible_facts['distribution'] == 'Kali' -%}true{%- else -%}false{%- endif -%}
       {%- else -%}{{ tailscale_systemctl_start | string }}{%- endif -%}
@@ -99,145 +77,113 @@
 - name: Tailscale | validate | Display detected configuration
   ansible.builtin.debug:
     msg:
-      - "🔧 Smart Configuration Detection Results:"
-      - "   GPG Key Method: {{ _tailscale_detected_key_method }}"
-      - "   Version Codename: {{ _tailscale_version_codename }}"
-      - "   Immediate Service Start: {{ _tailscale_detected_immediate_start }}"
-      - "   Release Track: {{ tailscale_track }}"
+      - "GPG: {{ __tailscale_detected_key_method }} | Codename: {{ __tailscale_version_codename }} | Track: {{ tailscale_track }}"
+    verbosity: 1
 
-# -----------------------------------------------------------------------------
-# 4. Network Connectivity Validation
-# -----------------------------------------------------------------------------
 - name: Tailscale | validate | Test connectivity to Tailscale repository
   ansible.builtin.uri:
-    url: "{{ _tailscale_connectivity_endpoints.repository }}/{{ tailscale_track }}/{{ ansible_facts['distribution'] | lower }}/{{ _tailscale_version_codename }}.list"
+    url: "{{ __tailscale_connectivity_endpoints.repository }}/{{ tailscale_track }}/{{ ansible_facts['distribution'] | lower }}/{{ __tailscale_version_codename }}.list"
     method: HEAD
     timeout: "{{ tailscale_connectivity_timeout }}"
     validate_certs: true
-  register: _tailscale_repo_connectivity
+  register: __tailscale_repo_connectivity
   failed_when: false
-  when: >
-    tailscale_validate_connectivity | bool
+  when:
+    - tailscale_validate_connectivity | bool
 
 - name: Tailscale | validate | Test connectivity to Tailscale API
   ansible.builtin.uri:
-    url: "{{ _tailscale_connectivity_endpoints.api }}/api/v2/tailnet"
+    url: "{{ __tailscale_connectivity_endpoints.api }}/api/v2/tailnet"
     method: HEAD
     timeout: "{{ tailscale_connectivity_timeout }}"
     validate_certs: true
-  register: _tailscale_api_connectivity
+  register: __tailscale_api_connectivity
   failed_when: false
-  when: >
-    tailscale_validate_connectivity | bool
+  when:
+    - tailscale_validate_connectivity | bool
 
 - name: Tailscale | validate | Assert repository connectivity
   ansible.builtin.assert:
     that:
-      - _tailscale_repo_connectivity.status | default(0) == 200
-    fail_msg: "❌ Cannot reach Tailscale repository at {{ _tailscale_connectivity_endpoints.repository }}. Status: {{ _tailscale_repo_connectivity.status | default('No response') }}"
-    success_msg: "✅ Tailscale repository is accessible"
-  when: >
-    tailscale_validate_connectivity | bool and
-    _tailscale_repo_connectivity is defined
+      - __tailscale_repo_connectivity.status | default(0) == 200
+    fail_msg: "Cannot reach Tailscale repository. Status: {{ __tailscale_repo_connectivity.status | default('No response') }}"
+    success_msg: "Tailscale repository is accessible"
+  when:
+    - tailscale_validate_connectivity | bool
+    - __tailscale_repo_connectivity is defined
 
 - name: Tailscale | validate | Warn about API connectivity
   ansible.builtin.debug:
-    msg: "⚠️ Warning: Cannot reach Tailscale API. This may affect some features but installation can continue."
-  when: >
-    tailscale_validate_connectivity | bool and
-    _tailscale_api_connectivity is defined and
-    _tailscale_api_connectivity.status | default(0) != 200
+    msg: "Warning: Cannot reach Tailscale API. Installation can continue."
+  when:
+    - tailscale_validate_connectivity | bool
+    - __tailscale_api_connectivity is defined
+    - __tailscale_api_connectivity.status | default(0) != 200
 
-# -----------------------------------------------------------------------------
-# 5. System Information Collection
-# -----------------------------------------------------------------------------
 - name: Tailscale | validate | Collect comprehensive system information
   ansible.builtin.set_fact:
-    tailscale_system_info:
-      # Basic system information
+    __tailscale_system_info:
       os: "{{ ansible_facts['distribution'] }}"
       version: "{{ ansible_facts['distribution_version'] }}"
       codename: "{{ ansible_facts['distribution_release'] }}"
       architecture: "{{ ansible_facts['architecture'] }}"
       kernel: "{{ ansible_facts['kernel'] }}"
-
-      # Package and service management
       package_manager: "{{ ansible_facts['pkg_mgr'] }}"
       service_manager: "{{ ansible_facts['service_mgr'] }}"
-
-      # Detected configuration
-      detected_key_method: "{{ _tailscale_detected_key_method }}"
-      immediate_start_required: "{{ _tailscale_detected_immediate_start }}"
-
-      # Role configuration
+      detected_key_method: "{{ __tailscale_detected_key_method }}"
+      immediate_start_required: "{{ __tailscale_detected_immediate_start }}"
       track: "{{ tailscale_track }}"
       install_method: "{{ tailscale_install_method }}"
-
-      # URLs and paths
-      repo_key_url: "{{ tailscale_repo_key_url }}"
-      repo_list_url: "{{ tailscale_repo_list_url }}"
-      repo_key_path: "{{ tailscale_repo_key_path }}"
-
-      # Diagnostic information
+      repo_key_url: "{{ __tailscale_os_repo_key_url }}"
+      repo_list_url: "{{ __tailscale_os_repo_list_url }}"
+      repo_key_path: "{{ __tailscale_os_repo_key_path }}"
       timestamp: "{{ ansible_facts['date_time'].iso8601 }}"
       ansible_version: "{{ ansible_version.full }}"
-      role_version: "{{ _tailscale_diagnostic_info.role_version }}"
+      role_version: "{{ __tailscale_diagnostic_info.role_version }}"
       target_host: "{{ inventory_hostname }}"
-  when: >
-    tailscale_collect_system_info | bool
+  when:
+    - tailscale_collect_system_info | bool
 
 - name: Tailscale | validate | Collect hardware information
   ansible.builtin.set_fact:
-    tailscale_hardware_info:
+    __tailscale_hardware_info:
       memory_mb: "{{ ansible_facts['memtotal_mb'] }}"
       cpu_cores: "{{ ansible_facts['processor_vcpus'] }}"
       cpu_model: "{{ ansible_facts['processor'][2] | default('unknown') }}"
       disk_space: "{{ ansible_facts['mounts'] | selectattr('mount', 'equalto', '/') | map(attribute='size_total') | first | default(0) }}"
-  when: >
-    tailscale_collect_system_info | bool and
-    tailscale_include_hardware_info | bool
+  when:
+    - tailscale_collect_system_info | bool
+    - tailscale_include_hardware_info | bool
 
 - name: Tailscale | validate | Collect network information
   ansible.builtin.set_fact:
-    tailscale_network_info:
+    __tailscale_network_info:
       default_ipv4: "{{ ansible_facts['default_ipv4'].address | default('none') }}"
       default_interface: "{{ ansible_facts['default_ipv4'].interface | default('none') }}"
       hostname: "{{ ansible_facts['hostname'] }}"
       fqdn: "{{ ansible_facts['fqdn'] }}"
       nameservers: "{{ ansible_facts['dns'].nameservers | default([]) }}"
-  when: >
-    tailscale_collect_system_info | bool and
-    tailscale_include_network_info | bool
+  when:
+    - tailscale_collect_system_info | bool
+    - tailscale_include_network_info | bool
 
-# -----------------------------------------------------------------------------
-# 6. Enhanced Error Reporting Setup
-# -----------------------------------------------------------------------------
-- name: Tailscale | validate | Display comprehensive system summary
+- name: Tailscale | validate | Display system validation summary
   ansible.builtin.debug:
     msg:
-      - "🎯 Tailscale Role System Validation Summary:"
-      - "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-      - "📋 System: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }} ({{ ansible_facts['distribution_release'] }})"
-      - "🏗️  Architecture: {{ ansible_facts['architecture'] }}"
-      - "📦 Package Manager: {{ ansible_facts['pkg_mgr'] }}"
-      - "🔧 Service Manager: {{ ansible_facts['service_mgr'] }}"
-      - "🔑 GPG Method: {{ _tailscale_detected_key_method }}"
-      - "🎯 Release Track: {{ tailscale_track }}"
-      - "🚀 Immediate Start: {{ _tailscale_detected_immediate_start }}"
-      - "🌐 Repository: {{ tailscale_repo_list_url }}"
-      - "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-      - "✅ All validation checks completed successfully!"
-  when: >
-    tailscale_collect_system_info | bool
+      - "Validation: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }} ({{ ansible_facts['architecture'] }})"
+      - "   Track: {{ tailscale_track }} | GPG: {{ __tailscale_detected_key_method }}"
+    verbosity: 1
+  when:
+    - tailscale_collect_system_info | bool
 
 - name: Tailscale | validate | Setup error reporting context
   ansible.builtin.set_fact:
-    _tailscale_error_context:
+    __tailscale_error_context:
       validation_completed: true
       validation_timestamp: "{{ ansible_facts['date_time'].iso8601 }}"
       detected_issues: []
       connectivity_status:
-        repository: "{{ 'ok' if (_tailscale_repo_connectivity.status | default(0) == 200) else 'failed' }}"
-        api: "{{ 'ok' if (_tailscale_api_connectivity.status | default(0) == 200) else 'failed' }}"
-  when: >
-    tailscale_enhanced_error_reporting | bool
+        repository: "{{ 'ok' if (__tailscale_repo_connectivity.status | default(0) == 200) else 'failed' }}"
+        api: "{{ 'ok' if (__tailscale_api_connectivity.status | default(0) == 200) else 'failed' }}"
+  when:
+    - tailscale_enhanced_error_reporting | bool

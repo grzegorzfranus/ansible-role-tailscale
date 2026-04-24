@@ -1,34 +1,7 @@
 ---
-# =============================================================================
-# Ansible Role: Tailscale - Main Tasks
-# =============================================================================
-# This is the main task file for the Tailscale role. It orchestrates execution
-# of role components in a clear order. Each task is tagged to allow selective
-# execution and is guarded appropriately for uninstall/check-mode scenarios.
-#
-# Flow:
-# 1. Load OS-specific variables (always)
-# 1.5 Validate system/detect settings (skipped when state=absent)
-# 2. Validate role variables (always)
-# 3. Check OS support (always)
-# 4. System prerequisites (skipped when state=absent)
-# 5. Configure package repositories (skipped when state=absent)
-# 6. Install Tailscale (skipped when state=absent)
-# 7. Configure service (skipped when state=absent)
-# 8. Optional logging (skipped when state=absent)
-# 8.5 Check authentication status (skipped when state=absent)
-# 9. Authenticate with Tailscale (idempotent, skipped in check-mode)
-# 10. Removal (executed last when state=absent)
-#
-# Notes:
-# - When tailscale_state is "absent", the role runs validations and OS check,
-#   then branches to removal at the end; install/config tasks are skipped.
-# - Authentication is idempotent and uses no_log to avoid leaking secrets.
-# =============================================================================
+# Tailscale Main — Orchestrates role execution in order.
+# Flow: vars → validate → assert → OS check → prereqs → repo → install → service → logging → auth → remove
 
-# -----------------------------------------------------------------------------
-# 1. OS-Specific Variables
-# -----------------------------------------------------------------------------
 - name: Tailscale | include_vars | Gather OS specific variables
   ansible.builtin.include_vars: "{{ lookup('first_found', params) }}"
   vars:
@@ -48,23 +21,17 @@
     - setup
     - init
 
-# -----------------------------------------------------------------------------
-# 1.5. System Validation and Detection (skipped on state=absent)
-# -----------------------------------------------------------------------------
 - name: Tailscale | validate | Perform comprehensive system validation
   ansible.builtin.include_tasks: validate.yml
-  when: >
-    tailscale_validate_system | bool and
-    (tailscale_state | lower != 'absent')
+  when:
+    - tailscale_validate_system | bool
+    - tailscale_state | lower != 'absent'
   tags:
     - always
     - validate
     - setup
     - init
 
-# -----------------------------------------------------------------------------
-# 2. Validate Role Variables (always)
-# -----------------------------------------------------------------------------
 - name: Tailscale | assert | Validate all role variables
   ansible.builtin.include_tasks: assert.yml
   tags:
@@ -73,13 +40,11 @@
     - setup
     - init
 
-# -----------------------------------------------------------------------------
-# 3. Check OS Support (always)
-# -----------------------------------------------------------------------------
 - name: Tailscale | assert | Check if OS is supported
   ansible.builtin.assert:
     that:
-      - (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_version'] == '24.04') or
+      - >-
+        (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_version'] == '24.04') or
         (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] == '13') or
         (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] == '12')
     fail_msg: "This role only supports Ubuntu 24.04 and Debian 13/12"
@@ -89,100 +54,81 @@
     - setup
     - init
 
-# -----------------------------------------------------------------------------
-# 4. System Prerequisites (skip on state=absent)
-# -----------------------------------------------------------------------------
 - name: Tailscale | prerequisites | Verify system prerequisites
   ansible.builtin.include_tasks: prerequisites.yml
-  when: >
-    tailscale_state | lower != 'absent'
+  when:
+    - tailscale_state | lower != 'absent'
   tags:
     - install
     - requirements
     - setup
 
-# -----------------------------------------------------------------------------
-# 5. Repository Configuration (skip on state=absent)
-# -----------------------------------------------------------------------------
 - name: Tailscale | repository | Configure package repositories
   ansible.builtin.include_tasks: repository.yml
-  when: >
-    tailscale_state | lower != 'absent'
+  when:
+    - tailscale_state | lower != 'absent'
   tags:
     - requirements
     - setup
 
-# -----------------------------------------------------------------------------
-# 6. Install Tailscale (skip on state=absent)
-# -----------------------------------------------------------------------------
 - name: Tailscale | install | Install Tailscale package
   ansible.builtin.include_tasks: install.yml
-  when: >
-    tailscale_state | lower != 'absent'
+  when:
+    - tailscale_state | lower != 'absent'
   tags:
     - install
     - setup
 
-# -----------------------------------------------------------------------------
-# 7. Service Configuration (skip on state=absent)
-# -----------------------------------------------------------------------------
 - name: Tailscale | service | Configure Tailscale service startup
   ansible.builtin.include_tasks: service.yml
-  when: >
-    tailscale_state | lower != 'absent'
+  when:
+    - tailscale_state | lower != 'absent'
   tags:
     - configure
     - setup
 
-# -----------------------------------------------------------------------------
-# 8. Logging Configuration (Optional, skip on state=absent)
-# -----------------------------------------------------------------------------
 - name: Tailscale | logging | Configure dedicated logging
   ansible.builtin.include_tasks: logging.yml
-  when: >
-    (tailscale_state | lower != 'absent') and
-    (tailscale_enable_logging | bool)
+  when:
+    - tailscale_state | lower != 'absent'
+    - tailscale_enable_logging | bool
   tags:
     - configure
     - setup
 
-# -----------------------------------------------------------------------------
-# 8.5. Check Authentication Status (Idempotent auth, skip on state=absent)
-# -----------------------------------------------------------------------------
 - name: Tailscale | auth | Check current authentication status
   ansible.builtin.command: tailscale status
-  register: _tailscale_auth_status
+  register: __tailscale_auth_status
   failed_when: false
   changed_when: false
-  when: >
-    tailscale_state | lower != 'absent'
+  when:
+    - tailscale_state | lower != 'absent'
 
-# -----------------------------------------------------------------------------
-# 9. Authentication (idempotent, skipped in check-mode)
-# -----------------------------------------------------------------------------
+# Authentication uses no_log to avoid leaking auth keys
 - name: Tailscale | command | Authenticate with Tailscale network
   become: true
   no_log: true
   ansible.builtin.command: >
     tailscale up --authkey={{ tailscale_auth_key | quote }} {{ tailscale_extra_args }}
-  register: tailscale_up_result
-  changed_when: "'Success' in tailscale_up_result.stdout"
-  failed_when: tailscale_up_result.rc != 0 and "already authenticated" not in tailscale_up_result.stderr
-  when: >
-    (tailscale_state | lower != 'absent') and
-    (tailscale_auth_key is defined and tailscale_auth_key | length > 0) and
-    (not ansible_check_mode) and
-    (_tailscale_auth_status.rc is not defined or _tailscale_auth_status.rc != 0)
+  register: __tailscale_up_result
+  changed_when: "'Success' in __tailscale_up_result.stdout"
+  failed_when:
+    - __tailscale_up_result.rc != 0
+    - "'already authenticated' not in __tailscale_up_result.stderr"
+  when:
+    - tailscale_state | lower != 'absent'
+    - tailscale_auth_key is defined
+    - tailscale_auth_key | length > 0
+    - not ansible_check_mode
+    - __tailscale_auth_status.rc is not defined or __tailscale_auth_status.rc != 0
   tags:
     - configure
     - setup
 
-# -----------------------------------------------------------------------------
-# 10. Removal (executed last when tailscale_state=absent)
-# -----------------------------------------------------------------------------
 - name: Tailscale | state | Handle absent state
   ansible.builtin.include_tasks: remove.yml
-  when: tailscale_state | lower == 'absent'
+  when:
+    - tailscale_state | lower == 'absent'
   tags:
     - always
     - init

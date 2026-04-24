@@ -1,64 +1,36 @@
 ---
-# =============================================================================
-# Ansible Role: Tailscale - Main Variables
-# =============================================================================
-# This file contains role-wide variables and computed values.
-# These variables are used across all tasks to maintain consistency
-# and provide dynamic configuration based on the target system.
-#
-# Sections:
-#   1. Service Configuration
-#   2. Repository Configuration
-#   3. Smart Key Management
-#   4. System Detection Variables
-#   5. Error Reporting Data
-# =============================================================================
+# Ansible Role: Tailscale - Internal constants and computed values
+# These are NOT user-overridable. All use double-underscore prefix per CoP §3.1.4.
 
-# -----------------------------------------------------------------------------
-# 1. Service Configuration
-# -----------------------------------------------------------------------------
-# Default service name for Tailscale daemon
-tailscale_service_name: "tailscaled"
+# Service name — constant across all supported distributions
+__tailscale_service_name: "tailscaled"
 
-# -----------------------------------------------------------------------------
-# 2. Repository Configuration (Track-Aware)
-# -----------------------------------------------------------------------------
-# Dynamic repository URLs based on track and detected system
-tailscale_repo_key_path: "/usr/share/keyrings/tailscale-archive-keyring.gpg"
+# Repository configuration — dynamic fallback for unsupported OS variants.
+# OS-specific files (debian_12.yml, ubuntu_24.04.yml, etc.) override these.
+__tailscale_os_repo_key_path: "/usr/share/keyrings/tailscale-archive-keyring.gpg"
 
-# Repository URLs with smart track and key method detection
-tailscale_repo_key_url: >-
+__tailscale_os_repo_key_url: >-
   https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_facts['distribution'] | lower }}/{{-
-  _tailscale_version_codename | default(ansible_facts['distribution_release']) }}.{%-
-  if (_tailscale_detected_key_method | default('keyring')) == 'keyring' -%}
+  __tailscale_version_codename | default(ansible_facts['distribution_release']) }}.{%-
+  if (__tailscale_detected_key_method | default('keyring')) == 'keyring' -%}
   noarmor.gpg{%- else -%} asc{%- endif -%}
 
-tailscale_repo_list_url: >-
+__tailscale_os_repo_list_url: >-
   https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_facts['distribution'] | lower }}/{{-
-  _tailscale_version_codename | default(ansible_facts['distribution_release']) }}.{%-
-  if (_tailscale_detected_key_method | default('keyring')) == 'keyring' -%}
+  __tailscale_version_codename | default(ansible_facts['distribution_release']) }}.{%-
+  if (__tailscale_detected_key_method | default('keyring')) == 'keyring' -%}
   tailscale-keyring.list{%- else -%} list{%- endif -%}
 
-# -----------------------------------------------------------------------------
-# 3. Smart Key Management Detection
-# -----------------------------------------------------------------------------
-# Auto-detection logic for GPG key management method
-# This will be populated by the validation tasks
-_tailscale_detected_key_method: "{{ tailscale_apt_key_type }}"
+# OS-specific prerequisite packages fallback (empty — user's defaults/main.yml are used)
+__tailscale_os_prerequisites: []
 
-# Distribution-specific service startup requirements
-# This will be populated by the validation tasks
-_tailscale_detected_immediate_start: "{{ tailscale_systemctl_start }}"
+# Smart detection defaults (populated by validate tasks at runtime)
+__tailscale_detected_key_method: "{{ tailscale_apt_key_type }}"
+__tailscale_detected_immediate_start: "{{ tailscale_systemctl_start }}"
+__tailscale_version_codename: "{{ ansible_facts['distribution_release'] }}"
 
-# Version codename detection
-# This will be populated by the validation tasks
-_tailscale_version_codename: "{{ ansible_facts['distribution_release'] }}"
-
-# -----------------------------------------------------------------------------
-# 4. System Detection Variables
-# -----------------------------------------------------------------------------
-# Comprehensive system information for configuration and diagnostics
-_tailscale_system_detection:
+# System detection
+__tailscale_system_detection:
   os_family: "{{ ansible_facts['os_family'] }}"
   distribution: "{{ ansible_facts['distribution'] }}"
   version: "{{ ansible_facts['distribution_version'] }}"
@@ -69,23 +41,20 @@ _tailscale_system_detection:
   package_manager: "{{ ansible_facts['pkg_mgr'] }}"
   service_manager: "{{ ansible_facts['service_mgr'] }}"
 
-# Supported architectures list
-_tailscale_supported_architectures:
+# Supported architectures
+__tailscale_supported_architectures:
   - "x86_64"
   - "aarch64"
   - "armv7l"
   - "arm64"
 
 # Supported package managers
-_tailscale_supported_package_managers:
+__tailscale_supported_package_managers:
   - "apt"
 
-# -----------------------------------------------------------------------------
-# 5. Error Reporting Data Collection
-# -----------------------------------------------------------------------------
-# Comprehensive system information for troubleshooting
-_tailscale_diagnostic_info:
-  role_version: "1.2.2"
+# Diagnostic info for error reporting
+__tailscale_diagnostic_info:
+  role_version: "1.4.0"
   execution_timestamp: "{{ ansible_facts['date_time'].iso8601 }}"
   ansible_version: "{{ ansible_version.full }}"
   target_host: "{{ inventory_hostname }}"
@@ -93,13 +62,13 @@ _tailscale_diagnostic_info:
   python_version: "{{ ansible_facts['python_version'] }}"
 
 # Network diagnostic endpoints
-_tailscale_connectivity_endpoints:
+__tailscale_connectivity_endpoints:
   repository: "https://pkgs.tailscale.com"
   api: "https://api.tailscale.com"
   login: "https://login.tailscale.com"
 
-# Log file locations for different distributions
-_tailscale_log_locations:
+# Log file locations
+__tailscale_log_locations:
   systemd: "/var/log/tailscaled.log"
   journal: "journalctl -u tailscaled"
   syslog: "/var/log/syslog"

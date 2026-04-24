@@ -1,19 +1,17 @@
 ---
-# =============================================================================
-# Ansible Role: Tailscale - Molecule Convergence (Uninstall Scenario)
-# =============================================================================
+# Tailscale Molecule — Converge for uninstall scenario.
 
 - name: Molecule | Converge (uninstall)
   hosts: all
 
   pre_tasks:
-    - name: 🔄 Converge | Update apt cache
+    - name: Converge | Update apt cache
       ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 600
       changed_when: false
-      when: >
-        ansible_os_family == "Debian"
+      when:
+        - ansible_facts['os_family'] == "Debian"
 
   vars:
     tailscale_auth_key: ""
@@ -21,14 +19,12 @@
     tailscale_validate_connectivity: false
 
   tasks:
-    - name: 🧩 Install role first to ensure resources exist
+    - name: Converge | Install role first to ensure resources exist
       ansible.builtin.include_role:
         name: ../../..
 
-    - name: 🧹 Run role in absent state
+    - name: Converge | Run role in absent state
       ansible.builtin.include_role:
         name: ../../..
       vars:
         tailscale_state: absent
-
-
