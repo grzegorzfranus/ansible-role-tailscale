@@ -5,6 +5,54 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-04-24
+
+### ⚠️ Breaking Changes
+- **Variable naming convention**: All internal variables renamed from `_tailscale_*` (single underscore) to `__tailscale_*` (double underscore) per Red Hat CoP §3.1.4
+- **OS-specific variables renamed** to internal namespace:
+  - `tailscale_repo_key_url` → `__tailscale_os_repo_key_url`
+  - `tailscale_repo_key_path` → `__tailscale_os_repo_key_path`
+  - `tailscale_repo_list_url` → `__tailscale_os_repo_list_url`
+  - `tailscale_prerequisites` (in OS-specific files) → `__tailscale_os_prerequisites`
+  - `tailscale_service_name` → `__tailscale_service_name`
+- **Output facts renamed** to internal namespace:
+  - `tailscale_system_info` → `__tailscale_system_info`
+  - `tailscale_installation_info` → `__tailscale_installation_info`
+  - `tailscale_error_report` → `__tailscale_error_report_full`
+  - `tailscale_up_result` → `__tailscale_up_result`
+- User-overridable `tailscale_prerequisites` in `defaults/main.yml` is now merged with OS-specific packages at runtime
+
+### Added ✅
+- **`meta/argument_specs.yml`**: Ansible-native argument validation (CoP §3.1.20) covering all 25+ public variables with types, choices, defaults, and descriptions
+- **Prerequisites merge pattern**: `tailscale_prerequisites` (user-defined) + `__tailscale_os_prerequisites` (OS-specific) merged at runtime via `__tailscale_merged_prerequisites`
+- **Dynamic fallback URLs** in `vars/main.yml` for unsupported OS variants — OS-specific files override these with static values
+- **`molecule/logging/prepare.yml`**: New prepare playbook for logging scenario (previously missing)
+- **`molecule/uninstall/prepare.yml`**: New prepare playbook for uninstall scenario (previously missing)
+
+### Changed 🔄
+- **ansible-lint profile**: Upgraded from `min` to `shared` (now passes `production` profile)
+- **Removed `meta-no-info` skip** from `.ansible-lint` (no longer needed with argument_specs)
+- **Debug tasks**: All `ansible.builtin.debug` tasks now include `verbosity: 1` to avoid cluttering production output (CoP §5.4)
+- **`when:` conditions**: All multi-condition `when:` blocks converted from `>` folding to list format (CoP §8.2)
+- **`failed_when:` on auth task**: Converted to list format for readability
+- **Rsyslog template backup**: Changed from `backup: false` to `backup: true` (CoP §3.1.14)
+- **Comments reduced**: Removed verbose banner comments (`=====`, `-----`) from all task and molecule files; each file now has a single-line header (CoP §8.3)
+
+### Molecule Tests 🧪
+- **Deprecated facts replaced**: All `ansible_os_family`, `ansible_service_mgr`, `ansible_pkg_mgr` → `ansible_facts['key']` format across all scenarios
+- **Emoji removed** from all Molecule task names for cleaner log parsing and CI output
+- **`shell` → `file` module**: `default/prepare.yml` shadow permissions fix now uses `ansible.builtin.file` instead of `ansible.builtin.shell`
+- **Dot notation → bracket notation**: All `.stat.exists` and `.rc` references converted to bracket `['stat']['exists']` format
+- **`vars_files` removed** from `default/verify.yml` — tests now verify effects directly, not role internals
+- **Old variable references fixed**: `tailscale_service_name` → hardcoded `tailscaled` in `logging/verify.yml`
+- **Deprecated `provisioner.lint`** removed from all `molecule.yml` (deprecated in Molecule 6+)
+
+### Code Quality 🎯
+- All files pass `yamllint` with zero errors
+- All files pass `ansible-lint` with zero failures, zero warnings
+- Passes `production` ansible-lint profile (higher than required `shared`)
+- Full compliance with [Red Hat CoP Automation Good Practices](https://redhat-cop.github.io/automation-good-practices/)
+
 ## [1.3.0] - 2026-03-15
 
 ### Fixed 🔧

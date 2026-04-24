@@ -1,41 +1,19 @@
 ---
-# =============================================================================
-# Ansible Role: Tailscale - Enhanced Error Reporting Tasks
-# =============================================================================
-# This file implements comprehensive error reporting and diagnostic collection
-# based on the official Tailscale installer script. It provides detailed
-# system information for troubleshooting installation issues.
-#
-# Flow:
-# 1. Error Context Collection
-# 2. System Diagnostic Information
-# 3. Package Manager State
-# 4. Network Configuration Details
-# 5. Service Status Information
-# 6. Log Collection
-# 7. Error Report Generation
-# =============================================================================
+# Tailscale Error Reporting — Comprehensive diagnostic collection for troubleshooting.
 
-# -----------------------------------------------------------------------------
-# 1. Error Context Collection
-# -----------------------------------------------------------------------------
 - name: Tailscale | error | Collect current error context
   ansible.builtin.set_fact:
-    _tailscale_error_report:
+    __tailscale_error_report:
       report_timestamp: "{{ ansible_facts['date_time'].iso8601 }}"
-      role_version: "{{ _tailscale_diagnostic_info.role_version }}"
+      role_version: "{{ __tailscale_diagnostic_info.role_version }}"
       failed_task: "{{ ansible_failed_task.name | default('Unknown task') }}"
       error_message: "{{ ansible_failed_result.msg | default('No error message available') }}"
       playbook_dir: "{{ playbook_dir | default('unknown') }}"
       inventory_hostname: "{{ inventory_hostname }}"
 
-# -----------------------------------------------------------------------------
-# 2. System Diagnostic Information
-# -----------------------------------------------------------------------------
 - name: Tailscale | error | Collect comprehensive system diagnostics
   ansible.builtin.set_fact:
-    _tailscale_system_diagnostics:
-      # Operating System Information
+    __tailscale_system_diagnostics:
       os_info:
         distribution: "{{ ansible_facts['distribution'] }}"
         version: "{{ ansible_facts['distribution_version'] }}"
@@ -44,8 +22,6 @@
         os_family: "{{ ansible_facts['os_family'] }}"
         kernel: "{{ ansible_facts['kernel'] }}"
         architecture: "{{ ansible_facts['architecture'] }}"
-
-      # Hardware Information
       hardware_info:
         memory_total_mb: "{{ ansible_facts['memtotal_mb'] | default('unknown') }}"
         memory_free_mb: "{{ ansible_facts['memfree_mb'] | default('unknown') }}"
@@ -53,8 +29,6 @@
         cpu_model: "{{ ansible_facts['processor'][2] | default('unknown') }}"
         virtualization_type: "{{ ansible_facts['virtualization_type'] | default('physical') }}"
         virtualization_role: "{{ ansible_facts['virtualization_role'] | default('host') }}"
-
-      # System Configuration
       system_config:
         hostname: "{{ ansible_facts['hostname'] }}"
         fqdn: "{{ ansible_facts['fqdn'] }}"
@@ -62,147 +36,112 @@
         uptime_seconds: "{{ ansible_facts['uptime_seconds'] | default('unknown') }}"
         selinux_status: "{{ ansible_facts['selinux'].status | default('unknown') }}"
         python_version: "{{ ansible_facts['python_version'] }}"
-
-      # Detected Configuration
       detected_config:
-        key_method: "{{ _tailscale_detected_key_method | default('not_detected') }}"
-        immediate_start: "{{ _tailscale_detected_immediate_start | default('not_detected') }}"
+        key_method: "{{ __tailscale_detected_key_method | default('not_detected') }}"
+        immediate_start: "{{ __tailscale_detected_immediate_start | default('not_detected') }}"
 
-# -----------------------------------------------------------------------------
-# 3. Package Manager State
-# -----------------------------------------------------------------------------
 - name: Tailscale | error | Collect package manager information
   ansible.builtin.set_fact:
-    _tailscale_package_diagnostics:
+    __tailscale_package_diagnostics:
       package_manager: "{{ ansible_facts['pkg_mgr'] }}"
-      package_manager_available: "{{ _tailscale_pkg_mgr_check.rc == 0 if _tailscale_pkg_mgr_check is defined else 'unknown' }}"
-      prerequisites_status: "{{ _tailscale_pkg_test.changed if _tailscale_pkg_test is defined else 'unknown' }}"
-  when: >
-    tailscale_include_package_info | bool
+      package_manager_available: "{{ __tailscale_pkg_mgr_check.rc == 0 if __tailscale_pkg_mgr_check is defined else 'unknown' }}"
+      prerequisites_status: "{{ __tailscale_pkg_test.changed if __tailscale_pkg_test is defined else 'unknown' }}"
+  when:
+    - tailscale_include_package_info | bool
 
 - name: Tailscale | error | Check current repository configuration
   ansible.builtin.find:
     paths: "/etc/apt/sources.list.d"
     patterns: "*tailscale*"
-  register: _tailscale_existing_repos
+  register: __tailscale_existing_repos
   failed_when: false
-  when: >
-    tailscale_include_package_info | bool and
-    ansible_facts['pkg_mgr'] == 'apt'
+  when:
+    - tailscale_include_package_info | bool
+    - ansible_facts['pkg_mgr'] == 'apt'
 
 - name: Tailscale | error | Check GPG keys
   ansible.builtin.find:
     paths: "/usr/share/keyrings"
     patterns: "*tailscale*"
-  register: _tailscale_existing_keys
+  register: __tailscale_existing_keys
   failed_when: false
-  when: >
-    tailscale_include_package_info | bool and
-    ansible_facts['pkg_mgr'] == 'apt'
+  when:
+    - tailscale_include_package_info | bool
+    - ansible_facts['pkg_mgr'] == 'apt'
 
-# -----------------------------------------------------------------------------
-# 4. Network Configuration Details
-# -----------------------------------------------------------------------------
 - name: Tailscale | error | Collect network configuration
   ansible.builtin.set_fact:
-    _tailscale_network_diagnostics:
-      # Network Interfaces
+    __tailscale_network_diagnostics:
       default_ipv4: "{{ ansible_default_ipv4 | default({}) }}"
       default_ipv6: "{{ ansible_default_ipv6 | default({}) }}"
       all_interfaces: "{{ ansible_interfaces | default([]) }}"
-
-      # DNS Configuration
       dns_nameservers: "{{ ansible_dns.nameservers | default([]) }}"
       dns_search: "{{ ansible_dns.search | default([]) }}"
-
-      # Connectivity Status
-      repository_connectivity: "{{ _tailscale_repo_connectivity.status | default('not_tested') if _tailscale_repo_connectivity is defined else 'not_tested' }}"
-      api_connectivity: "{{ _tailscale_api_connectivity.status | default('not_tested') if _tailscale_api_connectivity is defined else 'not_tested' }}"
-
-      # Proxy Configuration
+      repository_connectivity: "{{ __tailscale_repo_connectivity.status | default('not_tested') if __tailscale_repo_connectivity is defined else 'not_tested' }}"
+      api_connectivity: "{{ __tailscale_api_connectivity.status | default('not_tested') if __tailscale_api_connectivity is defined else 'not_tested' }}"
       http_proxy: "{{ ansible_env.HTTP_PROXY | default(ansible_env.http_proxy) | default('none') }}"
       https_proxy: "{{ ansible_env.HTTPS_PROXY | default(ansible_env.https_proxy) | default('none') }}"
       no_proxy: "{{ ansible_env.NO_PROXY | default(ansible_env.no_proxy) | default('none') }}"
-  when: >
-    tailscale_include_network_info | bool
+  when:
+    - tailscale_include_network_info | bool
 
-# -----------------------------------------------------------------------------
-# 5. Service Status Information
-# -----------------------------------------------------------------------------
 - name: Tailscale | error | Check Tailscale service status
   ansible.builtin.systemd:
-    name: "{{ tailscale_service_name }}"
-  register: _tailscale_service_status
+    name: "{{ __tailscale_service_name }}"
+  register: __tailscale_service_status
   failed_when: false
-  when: >
-    ansible_facts['service_mgr'] == 'systemd'
+  when:
+    - ansible_facts['service_mgr'] == 'systemd'
 
 - name: Tailscale | error | Check if Tailscale binary exists
   ansible.builtin.stat:
     path: "/usr/bin/tailscale"
-  register: _tailscale_binary_check
+  register: __tailscale_binary_check
 
 - name: Tailscale | error | Get Tailscale version if available
   ansible.builtin.command: "/usr/bin/tailscale version"
-  register: _tailscale_version_check
+  register: __tailscale_version_check
   failed_when: false
   changed_when: false
-  when: >
-    _tailscale_binary_check.stat.exists | default(false)
+  when:
+    - __tailscale_binary_check.stat.exists | default(false)
 
-# -----------------------------------------------------------------------------
-# 6. Log Collection
-# -----------------------------------------------------------------------------
 - name: Tailscale | error | Collect systemd journal logs
-  ansible.builtin.command: "journalctl -u {{ tailscale_service_name }} --lines={{ tailscale_error_log_lines }} --no-pager"
-  register: _tailscale_journal_logs
+  ansible.builtin.command: "journalctl -u {{ __tailscale_service_name }} --lines={{ tailscale_error_log_lines }} --no-pager"
+  register: __tailscale_journal_logs
   failed_when: false
   changed_when: false
-  when: >
-    ansible_facts['service_mgr'] == 'systemd' and
-    tailscale_error_log_lines > 0
+  when:
+    - ansible_facts['service_mgr'] == 'systemd'
+    - tailscale_error_log_lines > 0
 
 - name: Tailscale | error | Collect system logs
   ansible.builtin.command: "tail -n {{ tailscale_error_log_lines }} /var/log/syslog"
-  register: _tailscale_syslog
+  register: __tailscale_syslog
   failed_when: false
   changed_when: false
-  when: >
-    tailscale_error_log_lines > 0 and
-    ansible_facts['os_family'] == 'Debian'
+  when:
+    - tailscale_error_log_lines > 0
+    - ansible_facts['os_family'] == 'Debian'
 
-# -----------------------------------------------------------------------------
-# 7. Error Report Generation
-# -----------------------------------------------------------------------------
 - name: Tailscale | error | Generate comprehensive error report
   ansible.builtin.set_fact:
-    tailscale_error_report:
-      # Report Metadata
+    __tailscale_error_report_full:
       report_info:
-        timestamp: "{{ _tailscale_error_report.report_timestamp }}"
-        role_version: "{{ _tailscale_error_report.role_version }}"
+        timestamp: "{{ __tailscale_error_report.report_timestamp }}"
+        role_version: "{{ __tailscale_error_report.role_version }}"
         ansible_version: "{{ ansible_version.full }}"
-        failed_task: "{{ _tailscale_error_report.failed_task }}"
-        error_message: "{{ _tailscale_error_report.error_message }}"
+        failed_task: "{{ __tailscale_error_report.failed_task }}"
+        error_message: "{{ __tailscale_error_report.error_message }}"
         target_host: "{{ inventory_hostname }}"
-
-      # System Information
-      system: "{{ _tailscale_system_diagnostics }}"
-
-      # Package Information
-      packages: "{{ _tailscale_package_diagnostics | default({}) }}"
-
-      # Network Information
-      network: "{{ _tailscale_network_diagnostics | default({}) }}"
-
-      # Service Information
+      system: "{{ __tailscale_system_diagnostics }}"
+      packages: "{{ __tailscale_package_diagnostics | default({}) }}"
+      network: "{{ __tailscale_network_diagnostics | default({}) }}"
       service:
-        binary_exists: "{{ _tailscale_binary_check.stat.exists | default(false) }}"
-        binary_path: "{{ _tailscale_binary_check.stat.path | default('not_found') }}"
-        version: "{{ _tailscale_version_check.stdout | default('not_available') if _tailscale_version_check is defined else 'not_available' }}"
-        service_status: "{{ _tailscale_service_status | default({}) }}"
-
-      # Configuration Used
+        binary_exists: "{{ __tailscale_binary_check.stat.exists | default(false) }}"
+        binary_path: "{{ __tailscale_binary_check.stat.path | default('not_found') }}"
+        version: "{{ __tailscale_version_check.stdout | default('not_available') if __tailscale_version_check is defined else 'not_available' }}"
+        service_status: "{{ __tailscale_service_status | default({}) }}"
       role_configuration:
         track: "{{ tailscale_track }}"
         apt_key_type: "{{ tailscale_apt_key_type }}"
@@ -211,43 +150,30 @@
         systemctl_start: "{{ tailscale_systemctl_start }}"
         auth_key_provided: "{{ 'yes' if tailscale_auth_key | length > 0 else 'no' }}"
         extra_args: "{{ (tailscale_extra_args | regex_replace('--authkey[= ]\\S+', '--authkey=****')) if (tailscale_extra_args | length > 0) else '' }}"
-
-      # Repository Information
       repository:
-        existing_repos: "{{ _tailscale_existing_repos.files | default([]) | map(attribute='path') | list }}"
-        existing_keys: "{{ _tailscale_existing_keys.files | default([]) | map(attribute='path') | list }}"
-        repo_key_url: "{{ tailscale_repo_key_url }}"
-        repo_list_url: "{{ tailscale_repo_list_url }}"
-
-      # Logs (if collected)
+        existing_repos: "{{ __tailscale_existing_repos.files | default([]) | map(attribute='path') | list }}"
+        existing_keys: "{{ __tailscale_existing_keys.files | default([]) | map(attribute='path') | list }}"
+        repo_key_url: "{{ __tailscale_os_repo_key_url }}"
+        repo_list_url: "{{ __tailscale_os_repo_list_url }}"
       logs:
-        journal: "{{ _tailscale_journal_logs.stdout | default('not_collected') if _tailscale_journal_logs is defined else 'not_available' }}"
-        syslog: "{{ _tailscale_syslog.stdout | default('not_collected') if _tailscale_syslog is defined else 'not_available' }}"
+        journal: "{{ __tailscale_journal_logs.stdout | default('not_collected') if __tailscale_journal_logs is defined else 'not_available' }}"
+        syslog: "{{ __tailscale_syslog.stdout | default('not_collected') if __tailscale_syslog is defined else 'not_available' }}"
 
 - name: Tailscale | error | Display detailed error report
   ansible.builtin.debug:
     msg:
-      - "🚨 TAILSCALE ROLE ERROR REPORT 🚨"
-      - "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-      - "⏰ Timestamp: {{ tailscale_error_report.report_info.timestamp }}"
-      - "🎯 Failed Task: {{ tailscale_error_report.report_info.failed_task }}"
-      - "❌ Error: {{ tailscale_error_report.report_info.error_message }}"
-      - "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-      - "📋 System: {{ tailscale_error_report.system.os_info.distribution }} {{ tailscale_error_report.system.os_info.version }}"
-      - "🏗️  Architecture: {{ tailscale_error_report.system.os_info.architecture }}"
-      - "📦 Package Manager: {{ tailscale_error_report.packages.package_manager | default('unknown') }}"
-      - "🔑 GPG Method: {{ tailscale_error_report.system.detected_config.key_method }}"
-      - "🎯 Track: {{ tailscale_error_report.role_configuration.track }}"
-      - "🌐 Repository URL: {{ tailscale_error_report.repository.repo_list_url }}"
-      - "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-      - "📧 Please include this report when contacting support@tailscale.com"
-      - "🔗 Or file an issue at: https://github.com/tailscale/tailscale/issues"
+      - "🚨 TAILSCALE ROLE ERROR REPORT"
+      - "⏰ {{ __tailscale_error_report_full.report_info.timestamp }}"
+      - "🎯 Task: {{ __tailscale_error_report_full.report_info.failed_task }}"
+      - "❌ Error: {{ __tailscale_error_report_full.report_info.error_message }}"
+      - "📋 System: {{ __tailscale_error_report_full.system.os_info.distribution }} {{ __tailscale_error_report_full.system.os_info.version }}"
+      - "📧 Include this report when contacting support"
 
 - name: Tailscale | error | Save error report to file
   ansible.builtin.copy:
-    content: "{{ tailscale_error_report | to_nice_yaml }}"
+    content: "{{ __tailscale_error_report_full | to_nice_yaml }}"
     dest: "/tmp/tailscale-role-error-{{ ansible_facts['date_time'].epoch }}.yaml"
     mode: '0644'
   delegate_to: localhost
-  when: >
-    tailscale_enhanced_error_reporting | bool
+  when:
+    - tailscale_enhanced_error_reporting | bool

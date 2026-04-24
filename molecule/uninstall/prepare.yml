@@ -1,7 +1,7 @@
 ---
-# Tailscale Molecule — Prepare target for default scenario.
+# Tailscale Molecule — Prepare target for uninstall scenario.
 
-- name: Molecule | Prepare
+- name: Molecule | Prepare (uninstall)
   hosts: all
   gather_facts: true
 

@@ -1,24 +1,6 @@
 ---
-# =============================================================================
-# Ansible Role: Tailscale - Repository Tasks
-# =============================================================================
-# This file handles the configuration of package repositories required for
-# Tailscale installation. It sets up proper GPG keys and repository sources
-# based on the target operating system and uses smart key management detection.
-#
-# Flow:
-# 1. Create Required Directories
-# 2. Smart GPG Key Management (Legacy vs Keyring)
-# 3. Fetch Repository Configuration
-# 4. Configure Repository Sources
-#
-# The role dynamically configures repositories using the detected key method
-# and track selection, following the official Tailscale installer logic.
-# =============================================================================
+# Tailscale Repository — Configure APT repository and GPG keys.
 
-# -----------------------------------------------------------------------------
-# 1. Create Required Directories
-# -----------------------------------------------------------------------------
 - name: Tailscale | repository | Create keyrings directory
   become: true
   ansible.builtin.file:
@@ -37,68 +19,54 @@
     owner: root
     group: root
 
-# -----------------------------------------------------------------------------
-# 2. Key Management (Keyring Only)
-# -----------------------------------------------------------------------------
 - name: Tailscale | repository | Add repository key (Keyring Method)
   become: true
   ansible.builtin.get_url:
-    url: "{{ tailscale_repo_key_url }}"
-    dest: "{{ tailscale_repo_key_path }}"
+    url: "{{ __tailscale_os_repo_key_url }}"
+    dest: "{{ __tailscale_os_repo_key_path }}"
     mode: '0644'
     owner: root
     group: root
   timeout: "{{ tailscale_connectivity_timeout }}"
   retries: 3
   delay: 5
-  register: _tailscale_key_download
-  until: _tailscale_key_download is succeeded
+  register: __tailscale_key_download
+  until: __tailscale_key_download is succeeded
 
-# -----------------------------------------------------------------------------
-# 3. Configure APT Repository
-# -----------------------------------------------------------------------------
 - name: Tailscale | repository | Configure apt repository
   become: true
   ansible.builtin.apt_repository:
-    repo: "deb [signed-by={{ tailscale_repo_key_path }}] https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_facts['distribution'] | lower }} {{ _tailscale_version_codename }} main"
+    repo: "deb [signed-by={{ __tailscale_os_repo_key_path }}] https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_facts['distribution'] | lower }} {{ __tailscale_version_codename }} main"
     filename: tailscale
     state: present
-  register: _tailscale_repo_added
+  register: __tailscale_repo_added
 
-# -----------------------------------------------------------------------------
-# 4. Update Package Cache
-# -----------------------------------------------------------------------------
 - name: Tailscale | repository | Update package cache
   become: true
   ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 0
-  register: _tailscale_cache_update
+  register: __tailscale_cache_update
   retries: 3
   delay: 5
-  until: _tailscale_cache_update is succeeded
-  when: >
-    not ansible_check_mode
+  until: __tailscale_cache_update is succeeded
+  when:
+    - not ansible_check_mode
 
-# -----------------------------------------------------------------------------
-# 5. Verification
-# -----------------------------------------------------------------------------
 - name: Tailscale | repository | Verify repository configuration
   ansible.builtin.command: "apt-cache policy tailscale"
-  register: _tailscale_repo_verification
+  register: __tailscale_repo_verification
   changed_when: false
   failed_when:
-    - _tailscale_repo_verification.rc != 0
-    - "'No packages found' in _tailscale_repo_verification.stderr"
+    - __tailscale_repo_verification.rc != 0
+    - "'No packages found' in __tailscale_repo_verification.stderr"
 
 - name: Tailscale | repository | Display repository verification
   ansible.builtin.debug:
     msg:
-      - "🎯 Repository Configuration Completed Successfully:"
-      - "   GPG Key Method: {{ _tailscale_detected_key_method }}"
-      - "   Repository URL: {{ tailscale_repo_list_url }}"
-      - "   Key Path: {{ tailscale_repo_key_path if _tailscale_detected_key_method == 'keyring' else 'apt-key (legacy)' }}"
+      - "🎯 Repository configured: {{ __tailscale_os_repo_list_url }}"
+      - "   GPG Key Method: {{ __tailscale_detected_key_method }}"
       - "   Track: {{ tailscale_track }}"
-      - "   Package Available: {{ 'Yes' if _tailscale_repo_verification.rc == 0 else 'Check Failed' }}"
-  when: >
-    tailscale_collect_system_info | bool
+    verbosity: 1
+  when:
+    - tailscale_collect_system_info | bool

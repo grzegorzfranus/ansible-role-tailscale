@@ -1,0 +1,227 @@
+---
+argument_specs:
+  main:
+    short_description: "Install and configure Tailscale VPN on Debian-based systems"
+    description:
+      - "Installs Tailscale, configures the service, and optionally authenticates with a Tailscale network."
+      - "Supports Ubuntu 24.04, Debian 12 (Bookworm), and Debian 13 (Trixie)."
+    author: "Grzegorz Franus"
+
+    options:
+      # Authentication
+      tailscale_auth_key:
+        description: "Tailscale authentication key. Generate from https://login.tailscale.com/admin/authkeys"
+        type: str
+        default: ""
+
+      tailscale_extra_args:
+        description: "Extra arguments to pass to 'tailscale up' command (e.g. '--advertise-exit-node')"
+        type: str
+        default: ""
+
+      # Installation
+      tailscale_track:
+        description: "Release track selection"
+        type: str
+        default: "stable"
+        choices:
+          - stable
+          - unstable
+
+      tailscale_prerequisites:
+        description: "Prerequisite packages to install. Merged with OS-specific packages at runtime."
+        type: list
+        elements: str
+        default:
+          - curl
+          - gnupg
+
+      tailscale_apt_key_type:
+        description: "GPG key management method for apt-based systems"
+        type: str
+        default: "auto"
+        choices:
+          - auto
+          - legacy
+          - keyring
+
+      tailscale_install_method:
+        description: "Installation method preference"
+        type: str
+        default: "package"
+        choices:
+          - package
+          - binary
+
+      # Lifecycle
+      tailscale_state:
+        description: "Control overall role behavior: install or uninstall"
+        type: str
+        default: "present"
+        choices:
+          - present
+          - absent
+
+      # Service
+      tailscale_service_enabled:
+        description: "Whether the Tailscale service starts automatically on boot"
+        type: bool
+        default: true
+
+      tailscale_systemctl_start:
+        description: "Service startup behavior for special distributions"
+        type: str
+        default: "auto"
+
+      tailscale_service_manager:
+        description: "Service management method detection"
+        type: str
+        default: "auto"
+        choices:
+          - auto
+          - systemd
+
+      # Validation
+      tailscale_validate_system:
+        description: "Enable comprehensive system validation checks"
+        type: bool
+        default: true
+
+      tailscale_validate_connectivity:
+        description: "Enable network connectivity verification to Tailscale servers"
+        type: bool
+        default: true
+
+      tailscale_validate_prerequisites:
+        description: "Enable architecture and package manager validation"
+        type: bool
+        default: true
+
+      tailscale_collect_system_info:
+        description: "Collect detailed system information for diagnostics"
+        type: bool
+        default: true
+
+      tailscale_connectivity_timeout:
+        description: "Timeout for network connectivity checks (seconds)"
+        type: int
+        default: 10
+
+      # Error Reporting
+      tailscale_enhanced_error_reporting:
+        description: "Enable enhanced error reporting with system diagnostics"
+        type: bool
+        default: true
+
+      tailscale_include_hardware_info:
+        description: "Include system hardware information in error reports"
+        type: bool
+        default: true
+
+      tailscale_include_network_info:
+        description: "Include network configuration in error reports"
+        type: bool
+        default: true
+
+      tailscale_include_package_info:
+        description: "Include package manager state in error reports"
+        type: bool
+        default: true
+
+      tailscale_error_log_lines:
+        description: "Maximum lines of log output to include in error reports"
+        type: int
+        default: 50
+
+      # Logging
+      tailscale_enable_logging:
+        description: "Enable dedicated logging for Tailscale service (rsyslog + logrotate)"
+        type: bool
+        default: false
+
+      tailscale_log_dir:
+        description: "Directory for Tailscale log files"
+        type: str
+        default: "/var/log/tailscale"
+
+      tailscale_log_file:
+        description: "Main Tailscale log file path"
+        type: str
+        default: "{{ tailscale_log_dir }}/tailscale.log"
+
+      tailscale_log_file_permissions:
+        description: "File permissions for log files"
+        type: str
+        default: "0644"
+
+      tailscale_log_dir_permissions:
+        description: "Directory permissions for log directory"
+        type: str
+        default: "0755"
+
+      tailscale_log_user:
+        description: "Log file ownership user"
+        type: str
+        default: "syslog"
+
+      tailscale_log_group:
+        description: "Log file ownership group"
+        type: str
+        default: "adm"
+
+      tailscale_syslog_identifier:
+        description: "Syslog program identifier for filtering"
+        type: str
+        default: "tailscaled"
+
+      tailscale_rsyslog_config_file:
+        description: "RSyslog configuration file name"
+        type: str
+        default: "49-tailscale.conf"
+
+      tailscale_logrotate_options:
+        description: "Logrotate configuration options"
+        type: dict
+        default:
+          enabled: true
+          frequency: "weekly"
+          rotate_count: 4
+          compress: true
+          notifempty: true
+          copytruncate: false
+          dateext: true
+          dateformat: ".%Y-%m-%d"
+          olddir: ""
+        options:
+          enabled:
+            description: "Enable logrotate for Tailscale logs"
+            type: bool
+          frequency:
+            description: "Log rotation frequency"
+            type: str
+            choices:
+              - hourly
+              - daily
+              - weekly
+              - monthly
+          rotate_count:
+            description: "Number of rotated log files to keep"
+            type: int
+          compress:
+            description: "Compress rotated log files"
+            type: bool
+          notifempty:
+            description: "Only rotate if log file is not empty"
+            type: bool
+          copytruncate:
+            description: "Use copytruncate instead of moving files"
+            type: bool
+          dateext:
+            description: "Use date extension for rotated files"
+            type: bool
+          dateformat:
+            description: "Date format for rotated log files"
+            type: str
+          olddir:
+            description: "Directory to move old log files to (empty = same directory)"
+            type: str

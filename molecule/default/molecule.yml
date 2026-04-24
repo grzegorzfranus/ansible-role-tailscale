@@ -25,8 +25,6 @@ provisioner:
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
     verify: ${MOLECULE_PLAYBOOK:-verify.yml}
     prepare: ${MOLECULE_PLAYBOOK:-prepare.yml}
-  lint:
-    name: ansible-lint
   config_options:
     defaults:
       interpreter_python: auto_silent
@@ -37,13 +35,9 @@ provisioner:
   inventory:
     group_vars:
       all:
-        # Skip auth key requirement for testing
         tailscale_auth_key: ""
-        # Enable enhanced error reporting for tests
         tailscale_enhanced_error_reporting: true
-        # Collect system info for verification
         tailscale_collect_system_info: true
-        # Use stable track for testing
         tailscale_track: "stable"
 
 verifier:

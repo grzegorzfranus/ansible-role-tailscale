@@ -1,7 +1,7 @@
 ---
-# Tailscale Molecule — Prepare target for default scenario.
+# Tailscale Molecule — Prepare target for logging scenario.
 
-- name: Molecule | Prepare
+- name: Molecule | Prepare (logging)
   hosts: all
   gather_facts: true
 

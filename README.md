@@ -268,6 +268,21 @@ With this configuration, Tailscale logs will be directed to `/var/log/tailscale/
 | `tailscale_logrotate_options.dateformat` | Date format for rotated log files (requires dateext) | `".%Y-%m-%d"` |
 | `tailscale_logrotate_options.olddir` | Directory to move old log files to (automatically created if specified, empty = same directory) | `""` |
 
+## 📌 Role Properties
+
+| Property | Value | Description |
+|----------|-------|-------------|
+| **Idempotent** | ✅ Yes | Running the role multiple times with the same parameters produces the same result. Authentication is skipped if the node is already authenticated. |
+| **Atomic** | ❌ No | The role can be partially applied. A failure mid-execution may leave the system in an intermediate state (e.g., repository configured but package not installed). Use `tailscale_state: absent` to clean up. |
+| **Check Mode** | ✅ Supported | Most tasks work in check mode. Mutating commands (auth, apt cache) are skipped. |
+| **Diff Mode** | ✅ Supported | Template tasks support diff mode for change preview. |
+
+## 📤 Role Output
+
+This role does not set any public output facts. All internal facts use the `__tailscale_` double-underscore prefix and are not part of the public interface.
+
+To inspect diagnostic data at runtime, run the playbook with `-v` or `-vv` verbosity flags — the role provides detailed debug output at `verbosity: 1`.
+
 ## 🔍 Verification
 
 After deployment, verify Tailscale is working correctly:
@@ -353,6 +368,16 @@ To remove Tailscale and its repository/configuration from a host:
         tailscale_state: absent
 ```
 
+### Roll-back Capabilities
+
+This role **does not** support automatic rollback to a previous Tailscale version. If you need to revert:
+
+1. Use `tailscale_state: absent` to fully remove the current installation
+2. Re-run the role with the desired configuration
+3. For version pinning, use `tailscale_track` to select `stable` or `unstable` channels
+
+> **Note**: Tailscale authentication keys may need to be regenerated if they have expired during the rollback process.
+
 ## 🔒 Security considerations
 
 - Use Ansible Vault for `tailscale_auth_key` and any secrets.
@@ -375,8 +400,9 @@ To remove Tailscale and its repository/configuration from a host:
 
 ## 🧰 Repository management
 
-- Debian-family systems are configured via `apt_repository` with `signed-by` pointing to `{{ tailscale_repo_key_path }}`.
+- Debian-family systems are configured via `apt_repository` with `signed-by` pointing to the OS-specific keyring path.
 - The role uses the modern keyring method exclusively (no legacy `apt-key`).
+- Repository URLs and GPG key paths are managed internally — OS-specific values are loaded via `include_vars` with dynamic fallback for unsupported variants.
 
 ## 🔧 Troubleshooting
 
@@ -494,7 +520,8 @@ ansible-role-tailscale/
 ├── handlers/
 │   └── main.yml             # Service restart and reload handlers
 ├── meta/
-│   └── main.yml             # Role metadata and Galaxy information
+│   ├── main.yml             # Role metadata and Galaxy information
+│   └── argument_specs.yml   # Ansible-native argument validation (CoP §3.1.20)
 ├── molecule/                 # Molecule testing framework
 │   ├── default/             # Default test scenario
 │   │   ├── molecule.yml     # Test configuration

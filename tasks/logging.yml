@@ -1,21 +1,6 @@
 ---
-# =============================================================================
-# Ansible Role: Tailscale - Logging Configuration
-# =============================================================================
-# This file contains tasks for configuring comprehensive logging for Tailscale.
-# It handles systemd service logging, rsyslog integration, and log rotation
-# to provide complete operational visibility.
-#
-# Flow:
-# 1. Log Directory Management
-# 2. RSyslog Integration
-# 3. Systemd Service Override Configuration
-# 4. Log Rotation Configuration
-# =============================================================================
+# Tailscale Logging — Configure rsyslog, systemd journal, and logrotate.
 
-# -----------------------------------------------------------------------------
-# 1. Log Directory Management
-# -----------------------------------------------------------------------------
 - name: Tailscale | logging | Create Tailscale log directory
   become: true
   ansible.builtin.file:
@@ -36,9 +21,6 @@
     modification_time: preserve
     access_time: preserve
 
-# -----------------------------------------------------------------------------
-# 2. RSyslog Integration
-# -----------------------------------------------------------------------------
 - name: Tailscale | logging | Install rsyslog package
   become: true
   ansible.builtin.package:
@@ -62,28 +44,25 @@
     mode: '0644'
     owner: root
     group: root
-    backup: false
+    backup: true
   notify: Tailscale | handlers | Restart rsyslog
 
-# -----------------------------------------------------------------------------
-# 3. Systemd Service Override Configuration
-# -----------------------------------------------------------------------------
 - name: Tailscale | logging | Create systemd override directory
   become: true
   ansible.builtin.file:
-    path: "/etc/systemd/system/{{ tailscale_service_name }}.service.d"
+    path: "/etc/systemd/system/{{ __tailscale_service_name }}.service.d"
     state: directory
     mode: '0755'
     owner: root
     group: root
-  when: >
-    ansible_facts['service_mgr'] == 'systemd'
+  when:
+    - ansible_facts['service_mgr'] == 'systemd'
 
 - name: Tailscale | logging | Configure systemd service override for logging
   become: true
   ansible.builtin.template:
     src: systemd/logging.conf.j2
-    dest: "/etc/systemd/system/{{ tailscale_service_name }}.service.d/logging.conf"
+    dest: "/etc/systemd/system/{{ __tailscale_service_name }}.service.d/logging.conf"
     mode: '0644'
     owner: root
     group: root
@@ -91,19 +70,16 @@
   notify:
     - Tailscale | handlers | Reload systemd
     - Tailscale | handlers | Restart Tailscale service
-  when: >
-    ansible_facts['service_mgr'] == 'systemd'
+  when:
+    - ansible_facts['service_mgr'] == 'systemd'
 
-# -----------------------------------------------------------------------------
-# 4. Log Rotation Configuration
-# -----------------------------------------------------------------------------
 - name: Tailscale | logging | Install logrotate package
   become: true
   ansible.builtin.package:
     name: logrotate
     state: present
-  when: >
-    tailscale_logrotate_options.enabled | bool
+  when:
+    - tailscale_logrotate_options.enabled | bool
 
 - name: Tailscale | logging | Create logrotate olddir directory
   become: true
@@ -113,9 +89,9 @@
     mode: "{{ tailscale_log_dir_permissions }}"
     owner: "{{ tailscale_log_user }}"
     group: "{{ tailscale_log_group }}"
-  when: >
-    tailscale_logrotate_options.enabled | bool and
-    tailscale_logrotate_options.olddir | length > 0
+  when:
+    - tailscale_logrotate_options.enabled | bool
+    - tailscale_logrotate_options.olddir | length > 0
 
 - name: Tailscale | logging | Configure logrotate for Tailscale
   become: true
@@ -127,24 +103,13 @@
     group: root
     backup: true
     validate: "logrotate -d %s"
-  when: >
-    tailscale_logrotate_options.enabled | bool
+  when:
+    - tailscale_logrotate_options.enabled | bool
 
-# -----------------------------------------------------------------------------
-# 5. Configuration Verification and Status
-# -----------------------------------------------------------------------------
 - name: Tailscale | logging | Display logging configuration status
   ansible.builtin.debug:
     msg:
-      - "✅ Tailscale Logging Configuration Completed:"
-      - "   Log Directory: {{ tailscale_log_dir }}"
-      - "   Log File: {{ tailscale_log_file }}"
-      - "   Permissions: {{ tailscale_log_file_permissions }}"
-      - "   Owner: {{ tailscale_log_user }}:{{ tailscale_log_group }}"
-      - "   Syslog Identifier: {{ tailscale_syslog_identifier }}"
-      - "   RSyslog Config: /etc/rsyslog.d/{{ tailscale_rsyslog_config_file }}"
-      - "   Logrotate: {{ 'Enabled' if tailscale_logrotate_options.enabled else 'Disabled' }}"
-      - "   Rotation: {{ tailscale_logrotate_options.frequency }} (keep {{ tailscale_logrotate_options.rotate_count }})"
-      - "   Archive Directory: {{ tailscale_logrotate_options.olddir if tailscale_logrotate_options.olddir else 'Same directory' }}"
-  when: >
-    tailscale_collect_system_info | bool
+      - "✅ Logging: {{ tailscale_log_file }} ({{ tailscale_logrotate_options.frequency }})"
+    verbosity: 1
+  when:
+    - tailscale_collect_system_info | bool
