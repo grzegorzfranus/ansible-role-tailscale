@@ -13,7 +13,7 @@
 - name: Tailscale | service | Display service management configuration
   ansible.builtin.debug:
     msg:
-      - "🔧 Service: {{ __tailscale_service_name }} via {{ __tailscale_service_manager_detected }}"
+      - "Service: {{ __tailscale_service_name }} via {{ __tailscale_service_manager_detected }}"
       - "   Enabled: {{ tailscale_service_enabled }} | Immediate: {{ __tailscale_detected_immediate_start }}"
     verbosity: 1
 
@@ -49,7 +49,7 @@
 - name: Tailscale | service | Report service configuration status
   ansible.builtin.debug:
     msg:
-      - "✅ Service {{ __tailscale_service_name }}: {{ __tailscale_service_status.status.ActiveState | default('unknown') }}"
+      - "Service {{ __tailscale_service_name }}: {{ __tailscale_service_status.status.ActiveState | default('unknown') }}"
     verbosity: 1
   when:
     - tailscale_collect_system_info | bool

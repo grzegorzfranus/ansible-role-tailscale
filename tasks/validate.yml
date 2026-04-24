@@ -5,8 +5,8 @@
   ansible.builtin.assert:
     that:
       - ansible_facts['architecture'] in __tailscale_supported_architectures
-    fail_msg: "❌ Unsupported architecture '{{ ansible_facts['architecture'] }}'. Supported: {{ __tailscale_supported_architectures | join(', ') }}"
-    success_msg: "✅ Architecture supported: {{ ansible_facts['architecture'] }}"
+    fail_msg: "Unsupported architecture '{{ ansible_facts['architecture'] }}'. Supported: {{ __tailscale_supported_architectures | join(', ') }}"
+    success_msg: "Architecture supported: {{ ansible_facts['architecture'] }}"
   when:
     - tailscale_validate_prerequisites | bool
 
@@ -14,8 +14,8 @@
   ansible.builtin.assert:
     that:
       - ansible_facts['os_family'] in ['Debian']
-    fail_msg: "❌ Unsupported OS family '{{ ansible_facts['os_family'] }}'. Supported: Debian-based (Ubuntu 24.04, Debian 12/13)."
-    success_msg: "✅ OS family supported: {{ ansible_facts['os_family'] }}"
+    fail_msg: "Unsupported OS family '{{ ansible_facts['os_family'] }}'. Supported: Debian-based (Ubuntu 24.04, Debian 12/13)."
+    success_msg: "OS family supported: {{ ansible_facts['os_family'] }}"
   when:
     - tailscale_validate_prerequisites | bool
 
@@ -26,8 +26,8 @@
         (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_version'] == '24.04') or
         (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] == '13') or
         (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] == '12')
-    fail_msg: "❌ Unsupported: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}. Supported: Ubuntu 24.04, Debian 12/13"
-    success_msg: "✅ Distribution supported: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
+    fail_msg: "Unsupported: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}. Supported: Ubuntu 24.04, Debian 12/13"
+    success_msg: "Distribution supported: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
   when:
     - tailscale_validate_prerequisites | bool
 
@@ -44,8 +44,8 @@
     that:
       - __tailscale_pkg_mgr_check.rc == 0
       - ansible_facts['pkg_mgr'] in __tailscale_supported_package_managers
-    fail_msg: "❌ Package manager '{{ ansible_facts['pkg_mgr'] }}' not found or not supported"
-    success_msg: "✅ Package manager available: {{ ansible_facts['pkg_mgr'] }}"
+    fail_msg: "Package manager '{{ ansible_facts['pkg_mgr'] }}' not found or not supported"
+    success_msg: "Package manager available: {{ ansible_facts['pkg_mgr'] }}"
   when:
     - tailscale_validate_prerequisites | bool
 
@@ -77,7 +77,7 @@
 - name: Tailscale | validate | Display detected configuration
   ansible.builtin.debug:
     msg:
-      - "🔧 GPG: {{ __tailscale_detected_key_method }} | Codename: {{ __tailscale_version_codename }} | Track: {{ tailscale_track }}"
+      - "GPG: {{ __tailscale_detected_key_method }} | Codename: {{ __tailscale_version_codename }} | Track: {{ tailscale_track }}"
     verbosity: 1
 
 - name: Tailscale | validate | Test connectivity to Tailscale repository
@@ -106,15 +106,15 @@
   ansible.builtin.assert:
     that:
       - __tailscale_repo_connectivity.status | default(0) == 200
-    fail_msg: "❌ Cannot reach Tailscale repository. Status: {{ __tailscale_repo_connectivity.status | default('No response') }}"
-    success_msg: "✅ Tailscale repository is accessible"
+    fail_msg: "Cannot reach Tailscale repository. Status: {{ __tailscale_repo_connectivity.status | default('No response') }}"
+    success_msg: "Tailscale repository is accessible"
   when:
     - tailscale_validate_connectivity | bool
     - __tailscale_repo_connectivity is defined
 
 - name: Tailscale | validate | Warn about API connectivity
   ansible.builtin.debug:
-    msg: "⚠️ Warning: Cannot reach Tailscale API. Installation can continue."
+    msg: "Warning: Cannot reach Tailscale API. Installation can continue."
   when:
     - tailscale_validate_connectivity | bool
     - __tailscale_api_connectivity is defined
@@ -170,7 +170,7 @@
 - name: Tailscale | validate | Display system validation summary
   ansible.builtin.debug:
     msg:
-      - "✅ Validation: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }} ({{ ansible_facts['architecture'] }})"
+      - "Validation: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }} ({{ ansible_facts['architecture'] }})"
       - "   Track: {{ tailscale_track }} | GPG: {{ __tailscale_detected_key_method }}"
     verbosity: 1
   when:

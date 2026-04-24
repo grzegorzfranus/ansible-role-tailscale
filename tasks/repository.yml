@@ -64,7 +64,7 @@
 - name: Tailscale | repository | Display repository verification
   ansible.builtin.debug:
     msg:
-      - "🎯 Repository configured: {{ __tailscale_os_repo_list_url }}"
+      - "Repository configured: {{ __tailscale_os_repo_list_url }}"
       - "   GPG Key Method: {{ __tailscale_detected_key_method }}"
       - "   Track: {{ tailscale_track }}"
     verbosity: 1

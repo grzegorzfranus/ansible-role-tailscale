@@ -162,12 +162,12 @@
 - name: Tailscale | error | Display detailed error report
   ansible.builtin.debug:
     msg:
-      - "🚨 TAILSCALE ROLE ERROR REPORT"
-      - "⏰ {{ __tailscale_error_report_full.report_info.timestamp }}"
-      - "🎯 Task: {{ __tailscale_error_report_full.report_info.failed_task }}"
-      - "❌ Error: {{ __tailscale_error_report_full.report_info.error_message }}"
-      - "📋 System: {{ __tailscale_error_report_full.system.os_info.distribution }} {{ __tailscale_error_report_full.system.os_info.version }}"
-      - "📧 Include this report when contacting support"
+      - "TAILSCALE ROLE ERROR REPORT"
+      - "{{ __tailscale_error_report_full.report_info.timestamp }}"
+      - "Task: {{ __tailscale_error_report_full.report_info.failed_task }}"
+      - "Error: {{ __tailscale_error_report_full.report_info.error_message }}"
+      - "System: {{ __tailscale_error_report_full.system.os_info.distribution }} {{ __tailscale_error_report_full.system.os_info.version }}"
+      - "Include this report when contacting support"
 
 - name: Tailscale | error | Save error report to file
   ansible.builtin.copy:

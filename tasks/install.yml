@@ -10,7 +10,7 @@
 - name: Tailscale | install | Display pre-installation status
   ansible.builtin.debug:
     msg:
-      - "📦 Currently Installed: {{ 'Yes - ' + __tailscale_existing_version.stdout if __tailscale_existing_version.rc == 0 else 'No' }}"
+      - "Currently Installed: {{ 'Yes - ' + __tailscale_existing_version.stdout if __tailscale_existing_version.rc == 0 else 'No' }}"
       - "   Method: {{ tailscale_install_method }} | Track: {{ tailscale_track }}"
     verbosity: 1
 
@@ -44,7 +44,7 @@
 - name: Tailscale | install | Report installation results
   ansible.builtin.debug:
     msg:
-      - "✅ Tailscale {{ __tailscale_installed_version.stdout }} installed"
+      - "Tailscale {{ __tailscale_installed_version.stdout }} installed"
       - "   Changed: {{ 'Yes' if __tailscale_installation_result.changed else 'No (already installed)' }}"
     verbosity: 1
   when:

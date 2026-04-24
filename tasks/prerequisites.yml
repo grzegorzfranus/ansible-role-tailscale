@@ -10,13 +10,13 @@
   ansible.builtin.assert:
     that:
       - __tailscale_merged_prerequisites | length > 0
-    fail_msg: "❌ Prerequisites list is empty or undefined"
-    success_msg: "✅ Prerequisites list validated: {{ __tailscale_merged_prerequisites | join(', ') }}"
+    fail_msg: "Prerequisites list is empty or undefined"
+    success_msg: "Prerequisites list validated: {{ __tailscale_merged_prerequisites | join(', ') }}"
 
 - name: Tailscale | prerequisites | Display prerequisites to install
   ansible.builtin.debug:
     msg:
-      - "📦 Installing Tailscale Prerequisites:"
+      - "Installing Tailscale Prerequisites:"
       - "   Packages: {{ __tailscale_merged_prerequisites | join(', ') }}"
       - "   Package Manager: {{ ansible_facts['pkg_mgr'] }}"
     verbosity: 1
@@ -44,7 +44,7 @@
 - name: Tailscale | prerequisites | Report installation status
   ansible.builtin.debug:
     msg:
-      - "✅ Prerequisites: {{ __tailscale_merged_prerequisites | length }} packages installed"
+      - "Prerequisites: {{ __tailscale_merged_prerequisites | length }} packages installed"
     verbosity: 1
   when:
     - tailscale_collect_system_info | bool

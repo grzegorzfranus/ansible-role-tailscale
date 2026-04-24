@@ -37,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`failed_when:` on auth task**: Converted to list format for readability
 - **Rsyslog template backup**: Changed from `backup: false` to `backup: true` (CoP §3.1.14)
 - **Comments reduced**: Removed verbose banner comments (`=====`, `-----`) from all task and molecule files; each file now has a single-line header (CoP §8.3)
+- **Emoji removed** from all `fail_msg`, `success_msg`, and `debug` messages in role tasks for enterprise-grade log output
 
 ### Molecule Tests 🧪
 - **Deprecated facts replaced**: All `ansible_os_family`, `ansible_service_mgr`, `ansible_pkg_mgr` → `ansible_facts['key']` format across all scenarios

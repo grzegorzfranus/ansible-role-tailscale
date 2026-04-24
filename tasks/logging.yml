@@ -109,7 +109,7 @@
 - name: Tailscale | logging | Display logging configuration status
   ansible.builtin.debug:
     msg:
-      - "✅ Logging: {{ tailscale_log_file }} ({{ tailscale_logrotate_options.frequency }})"
+      - "Logging: {{ tailscale_log_file }} ({{ tailscale_logrotate_options.frequency }})"
     verbosity: 1
   when:
     - tailscale_collect_system_info | bool
