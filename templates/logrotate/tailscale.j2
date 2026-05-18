@@ -34,7 +34,7 @@
     {% if tailscale_logrotate_options.olddir %}
     olddir {{ tailscale_logrotate_options.olddir }}
     {% endif %}
-    create {{ tailscale_log_file_permissions }} {{ tailscale_log_user }} {{ tailscale_log_group }}
+    create {{ tailscale_log_file_permissions }} {{ __tailscale_os_log_user | default(tailscale_log_user) }} {{ __tailscale_os_log_group | default(tailscale_log_group) }}
     missingok
     {% if tailscale_logrotate_options.notifempty %}
     notifempty

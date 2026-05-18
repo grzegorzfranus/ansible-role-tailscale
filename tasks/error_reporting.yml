@@ -173,7 +173,7 @@
         existing_repos: "{{ __tailscale_existing_repos.files | default([]) | map(attribute='path') | list }}"
         existing_keys: "{{ __tailscale_existing_keys.files | default([]) | map(attribute='path') | list }}"
         repo_key_url: "{{ __tailscale_os_repo_key_url }}"
-        repo_list_url: "{{ __tailscale_os_repo_list_url }}"
+        repo_list_url: "{{ __tailscale_os_repo_list_url | default(__tailscale_os_repo_url) }}"
       logs:
         journal: "{{ __tailscale_journal_logs.stdout | default('not_collected') if __tailscale_journal_logs is defined else 'not_available' }}"
         syslog: "{{ __tailscale_syslog.stdout | default('not_collected') if __tailscale_syslog is defined else 'not_available' }}"
