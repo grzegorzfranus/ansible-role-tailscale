@@ -76,7 +76,7 @@
   ansible.builtin.set_fact:
     __tailscale_detected_immediate_start: >-
       {%- if tailscale_systemctl_start == 'auto' -%}
-      {%- if ansible_facts['distribution'] == 'Kali' -%}true{%- else -%}false{%- endif -%}
+      {%- if ansible_facts['distribution'] == 'Kali' or ansible_facts['os_family'] == 'RedHat' -%}true{%- else -%}false{%- endif -%}
       {%- else -%}{{ tailscale_systemctl_start | string }}{%- endif -%}
 
 - name: Tailscale | validate | Display detected configuration
