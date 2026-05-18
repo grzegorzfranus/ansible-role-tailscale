@@ -511,7 +511,8 @@ If you encounter the error `Recursive loop detected in template: maximum recursi
 ansible-role-tailscale/
 ├── .github/                  # GitHub Actions workflows
 │   └── workflows/           # CI/CD automation
-│       └── test-and-validation.yml # 🧪 Testing and validation workflow
+│       ├── publish-to-galaxy.yml   # Ansible Galaxy publish workflow
+│       └── test-and-validation.yml # CI/CD Testing and validation workflow
 ├── CHANGELOG.md              # Version history and changes
 ├── LICENSE                   # Apache-2.0 license
 ├── README.md                # This documentation file
