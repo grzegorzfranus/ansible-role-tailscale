@@ -1,6 +1,12 @@
 ---
 # Tailscale Logging — Configure rsyslog, systemd journal, and logrotate.
 
+- name: Tailscale | logging | Install rsyslog package
+  become: true
+  ansible.builtin.package:
+    name: rsyslog
+    state: present
+
 - name: Tailscale | logging | Create Tailscale log directory
   become: true
   ansible.builtin.file:
@@ -20,12 +26,6 @@
     group: "{{ __tailscale_os_log_group | default(tailscale_log_group) }}"
     modification_time: preserve
     access_time: preserve
-
-- name: Tailscale | logging | Install rsyslog package
-  become: true
-  ansible.builtin.package:
-    name: rsyslog
-    state: present
 
 - name: Tailscale | logging | Ensure rsyslog.d directory exists
   become: true
