@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Standardized workflow and job naming to enterprise convention (Numbered Title Case)
+- Updated `README.md` file structure documentation to remove emojis and include the publish workflow
 
 ## [1.4.0] - 2026-04-24
 
