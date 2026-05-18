@@ -4,7 +4,8 @@
 - name: Tailscale | prerequisites | Merge user and OS-specific package lists
   ansible.builtin.set_fact:
     __tailscale_merged_prerequisites: >-
-      {{ (tailscale_prerequisites + __tailscale_os_prerequisites | default([])) | unique }}
+      {{ ((tailscale_prerequisites if ansible_facts['os_family'] == 'Debian' else [])
+          + __tailscale_os_prerequisites | default([])) | unique }}
 
 - name: Tailscale | prerequisites | Validate merged prerequisites list
   ansible.builtin.assert:
