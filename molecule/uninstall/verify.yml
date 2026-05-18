@@ -6,7 +6,8 @@
   gather_facts: true
 
   tasks:
-    - name: Verify | Check that package is absent
+    # --- Debian uninstall verification ---
+    - name: Verify | Check that package is absent (dpkg)
       ansible.builtin.command: "dpkg -l tailscale"
       register: __verify_pkg
       failed_when: false
@@ -14,7 +15,7 @@
       when:
         - ansible_facts['pkg_mgr'] == 'apt'
 
-    - name: Verify | Assert package not present
+    - name: Verify | Assert package not present (dpkg)
       ansible.builtin.assert:
         that:
           - __verify_pkg['rc'] != 0 or ('no packages found' in (__verify_pkg['stderr'] | lower))
@@ -23,7 +24,7 @@
       when:
         - ansible_facts['pkg_mgr'] == 'apt'
 
-    - name: Verify | Check repo file removed
+    - name: Verify | Check repo file removed (apt)
       ansible.builtin.find:
         paths: "/etc/apt/sources.list.d"
         patterns: "*tailscale*"
@@ -31,11 +32,46 @@
       when:
         - ansible_facts['pkg_mgr'] == 'apt'
 
-    - name: Verify | Assert repo removed
+    - name: Verify | Assert repo removed (apt)
       ansible.builtin.assert:
         that:
           - (__verify_repo['files'] | length) == 0
-        success_msg: "Repository removed"
-        fail_msg: "Repository still present"
+        success_msg: "APT repository removed"
+        fail_msg: "APT repository still present"
       when:
         - ansible_facts['pkg_mgr'] == 'apt'
+
+    # --- RedHat uninstall verification ---
+    - name: Verify | Check that package is absent (rpm)
+      ansible.builtin.command: "rpm -q tailscale"
+      register: __verify_rpm
+      failed_when: false
+      changed_when: false
+      when:
+        - ansible_facts['pkg_mgr'] == 'dnf'
+
+    - name: Verify | Assert package not present (rpm)
+      ansible.builtin.assert:
+        that:
+          - __verify_rpm['rc'] != 0
+        success_msg: "Tailscale RPM package absent"
+        fail_msg: "Tailscale RPM package still present"
+      when:
+        - ansible_facts['pkg_mgr'] == 'dnf'
+
+    - name: Verify | Check repo file removed (dnf)
+      ansible.builtin.find:
+        paths: "/etc/yum.repos.d"
+        patterns: "*tailscale*"
+      register: __verify_dnf_repo
+      when:
+        - ansible_facts['pkg_mgr'] == 'dnf'
+
+    - name: Verify | Assert repo removed (dnf)
+      ansible.builtin.assert:
+        that:
+          - (__verify_dnf_repo['files'] | length) == 0
+        success_msg: "DNF repository removed"
+        fail_msg: "DNF repository still present"
+      when:
+        - ansible_facts['pkg_mgr'] == 'dnf'

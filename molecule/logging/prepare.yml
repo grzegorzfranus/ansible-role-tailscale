@@ -11,7 +11,7 @@
         path: /etc/shadow
         mode: '0400'
 
-    - name: Prepare | Ensure required directories exist
+    - name: Prepare | Ensure required directories exist (Debian)
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
@@ -24,6 +24,16 @@
       when:
         - ansible_facts['os_family'] == "Debian"
 
+    - name: Prepare | Ensure required directories exist (RedHat)
+      ansible.builtin.file:
+        path: /etc/yum.repos.d
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      when:
+        - ansible_facts['os_family'] == "RedHat"
+
     - name: Prepare | Update apt cache
       ansible.builtin.apt:
         update_cache: true
@@ -31,6 +41,13 @@
       changed_when: false
       when:
         - ansible_facts['os_family'] == "Debian"
+
+    - name: Prepare | Update dnf cache
+      ansible.builtin.dnf:
+        update_cache: true
+      changed_when: false
+      when:
+        - ansible_facts['os_family'] == "RedHat"
 
     - name: Prepare | Wait for systemd to complete initialization
       ansible.builtin.systemd:

@@ -13,8 +13,8 @@
 - name: Tailscale | validate | Validate operating system support
   ansible.builtin.assert:
     that:
-      - ansible_facts['os_family'] in ['Debian']
-    fail_msg: "Unsupported OS family '{{ ansible_facts['os_family'] }}'. Supported: Debian-based (Ubuntu 24.04, Debian 12/13)."
+      - ansible_facts['os_family'] in ['Debian', 'RedHat']
+    fail_msg: "Unsupported OS family '{{ ansible_facts['os_family'] }}'. Supported: Debian (Ubuntu 24.04, Debian 12/13), RedHat (EL9)."
     success_msg: "OS family supported: {{ ansible_facts['os_family'] }}"
   when:
     - tailscale_validate_prerequisites | bool
@@ -25,8 +25,9 @@
       - >-
         (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_version'] == '24.04') or
         (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] == '13') or
-        (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] == '12')
-    fail_msg: "Unsupported: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}. Supported: Ubuntu 24.04, Debian 12/13"
+        (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] == '12') or
+        (ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] == '9')
+    fail_msg: "Unsupported: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}. Supported: Ubuntu 24.04, Debian 12/13, EL9"
     success_msg: "Distribution supported: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
   when:
     - tailscale_validate_prerequisites | bool
@@ -62,10 +63,14 @@
 - name: Tailscale | validate | Detect optimal GPG key management method
   ansible.builtin.set_fact:
     __tailscale_detected_key_method: keyring
+  when:
+    - ansible_facts['os_family'] == 'Debian'
 
 - name: Tailscale | validate | Detect version codename for repository URLs
   ansible.builtin.set_fact:
     __tailscale_version_codename: "{{ ansible_facts['distribution_release'] }}"
+  when:
+    - ansible_facts['os_family'] == 'Debian'"
 
 - name: Tailscale | validate | Detect service startup requirements
   ansible.builtin.set_fact:
@@ -80,7 +85,7 @@
       - "GPG: {{ __tailscale_detected_key_method }} | Codename: {{ __tailscale_version_codename }} | Track: {{ tailscale_track }}"
     verbosity: 1
 
-- name: Tailscale | validate | Test connectivity to Tailscale repository
+- name: Tailscale | validate | Test connectivity to Tailscale repository (Debian)
   ansible.builtin.uri:
     url: "{{ __tailscale_connectivity_endpoints.repository }}/{{ tailscale_track }}/{{ ansible_facts['distribution'] | lower }}/{{ __tailscale_version_codename }}.list"
     method: HEAD
@@ -90,6 +95,19 @@
   failed_when: false
   when:
     - tailscale_validate_connectivity | bool
+    - ansible_facts['os_family'] == 'Debian'
+
+- name: Tailscale | validate | Test connectivity to Tailscale repository (RedHat)
+  ansible.builtin.uri:
+    url: "{{ __tailscale_os_repo_url }}"
+    method: HEAD
+    timeout: "{{ tailscale_connectivity_timeout }}"
+    validate_certs: true
+  register: __tailscale_repo_connectivity
+  failed_when: false
+  when:
+    - tailscale_validate_connectivity | bool
+    - ansible_facts['os_family'] == 'RedHat'
 
 - name: Tailscale | validate | Test connectivity to Tailscale API
   ansible.builtin.uri:

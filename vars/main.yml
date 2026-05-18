@@ -6,8 +6,11 @@
 __tailscale_service_name: "tailscaled"
 
 # Repository configuration — dynamic fallback for unsupported OS variants.
-# OS-specific files (debian_12.yml, ubuntu_24.04.yml, etc.) override these.
+# OS-specific files (debian_12.yml, ubuntu_24.04.yml, redhat_9.yml, etc.) override these.
 __tailscale_os_repo_key_path: "/usr/share/keyrings/tailscale-archive-keyring.gpg"
+
+# RedHat-family repo URL (overridden by OS-specific vars files)
+__tailscale_os_repo_url: ""
 
 __tailscale_os_repo_key_url: >-
   https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_facts['distribution'] | lower }}/{{-
@@ -23,6 +26,11 @@ __tailscale_os_repo_list_url: >-
 
 # OS-specific prerequisite packages fallback (empty — user's defaults/main.yml are used)
 __tailscale_os_prerequisites: []
+
+# OS-specific logging defaults (overridden by redhat_9.yml for EL9)
+__tailscale_os_log_user: "{{ tailscale_log_user }}"
+__tailscale_os_log_group: "{{ tailscale_log_group }}"
+__tailscale_os_syslog_path: "/var/log/syslog"
 
 # Smart detection defaults (populated by validate tasks at runtime)
 __tailscale_detected_key_method: "{{ tailscale_apt_key_type }}"
@@ -51,6 +59,7 @@ __tailscale_supported_architectures:
 # Supported package managers
 __tailscale_supported_package_managers:
   - "apt"
+  - "dnf"
 
 # Diagnostic info for error reporting
 __tailscale_diagnostic_info:

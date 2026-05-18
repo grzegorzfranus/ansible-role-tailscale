@@ -47,6 +47,8 @@ jobs:
             distro: debian13
           - scenario: default
             distro: debian12
+          - scenario: default
+            distro: rockylinux9
 
     steps:
       - name: 2.1 Checkout Code

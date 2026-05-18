@@ -9,7 +9,7 @@
       - __tailscale_os_repo_key_url is defined
       - __tailscale_os_repo_key_url is string
       - __tailscale_os_repo_key_url | length > 0
-      - __tailscale_os_repo_key_url is match("^https://.*\.gpg$")
+      - __tailscale_os_repo_key_url is match("^https://.*")
     fail_msg: "Invalid repository key URL '{{ __tailscale_os_repo_key_url | default('undefined') }}'"
     success_msg: "Repository key URL is valid"
 
@@ -74,6 +74,8 @@
       - tailscale_apt_key_type in ['auto', 'legacy', 'keyring']
     fail_msg: "Invalid tailscale_apt_key_type '{{ tailscale_apt_key_type }}'. Allowed: auto, legacy, keyring"
     success_msg: "APT key type: {{ tailscale_apt_key_type }}"
+  when:
+    - ansible_facts['os_family'] == 'Debian'
 
 - name: Tailscale | assert | Validate connectivity timeout
   ansible.builtin.assert:

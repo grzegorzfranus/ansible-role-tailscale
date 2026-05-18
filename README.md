@@ -53,6 +53,9 @@ List of officially supported operating systems for this role:
 | Ubuntu | 24.04 (Noble) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Debian | 13 (Trixie)   | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Debian | 12 (Bookworm) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
+| Rocky Linux | 9 | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
+| RHEL | 9 | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
+| AlmaLinux | 9 | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 
 ### Ansible version
 
@@ -249,8 +252,8 @@ With this configuration, Tailscale logs will be directed to `/var/log/tailscale/
 | `tailscale_log_file` | Main Tailscale log file path | `"{{ tailscale_log_dir }}/tailscale.log"` |
 | `tailscale_log_file_permissions` | File permissions for log files (readable by system users) | `"0644"` |
 | `tailscale_log_dir_permissions` | Directory permissions for log directory | `"0755"` |
-| `tailscale_log_user` | Log file ownership user | `"syslog"` |
-| `tailscale_log_group` | Log file ownership group | `"adm"` |
+| `tailscale_log_user` | Log file ownership user (overridden by OS-specific vars on EL9: `root`) | `"syslog"` |
+| `tailscale_log_group` | Log file ownership group (overridden by OS-specific vars on EL9: `root`) | `"adm"` |
 | `tailscale_syslog_identifier` | Syslog program identifier for filtering | `"tailscaled"` |
 | `tailscale_rsyslog_config_file` | RSyslog configuration file name | `"49-tailscale.conf"` |
 
@@ -387,7 +390,7 @@ This role **does not** support automatic rollback to a previous Tailscale versio
 ## 🧪 Check mode behavior
 
 - Most informational tasks run in check mode.
-- Mutating commands (auth, apt cache updates) are skipped in check mode where appropriate.
+- Mutating commands (auth, apt/dnf cache updates) are skipped in check mode where appropriate.
 - Authentication is idempotent and skipped if the node is already authenticated.
 
 ## 🏷️ Tags usage
@@ -400,9 +403,18 @@ This role **does not** support automatic rollback to a previous Tailscale versio
 
 ## 🧰 Repository management
 
-- Debian-family systems are configured via `apt_repository` with `signed-by` pointing to the OS-specific keyring path.
-- The role uses the modern keyring method exclusively (no legacy `apt-key`).
-- Repository URLs and GPG key paths are managed internally — OS-specific values are loaded via `include_vars` with dynamic fallback for unsupported variants.
+### Debian-family systems (Ubuntu, Debian)
+
+- Configured via `apt_repository` with `signed-by` pointing to the OS-specific keyring path.
+- Uses the modern keyring method exclusively (no legacy `apt-key`).
+- Repository URLs and GPG key paths are managed internally via `include_vars`.
+
+### RedHat-family systems (Rocky Linux 9, RHEL 9, AlmaLinux 9)
+
+- Configured via `yum_repository` module with GPG checking enabled.
+- GPG key imported via `rpm_key` module with retry logic.
+- Uses the official Tailscale RHEL 9 repository (`pkgs.tailscale.com/stable/rhel/9/`).
+- All EL9 derivatives share the same binary-compatible repository.
 
 ## 🔧 Troubleshooting
 
@@ -448,15 +460,26 @@ ip route show | grep tailscale
 ### Repository and Installation Issues
 
 ```bash
-# Verify repository configuration
+# Verify repository configuration (Debian)
 grep -R "pkgs.tailscale.com" /etc/apt/sources.list.d/
 
-# Check signed-by key file (keyring method)
+# Check signed-by key file (Debian keyring method)
 ls -l /usr/share/keyrings/tailscale-archive-keyring.gpg
 
-# Manual package refresh
+# Manual package refresh (Debian)
 sudo apt update
 sudo apt install tailscale
+
+# Verify repository configuration (EL9)
+sudo dnf repolist tailscale-stable
+cat /etc/yum.repos.d/tailscale-stable.repo
+
+# Check RPM GPG key (EL9)
+rpm -qa gpg-pubkey* | xargs rpm -qi | grep -i tailscale
+
+# Manual package refresh (EL9)
+sudo dnf makecache
+sudo dnf install tailscale
 ```
 
 ### Ansible 2.20+ Compatibility
@@ -544,7 +567,9 @@ ansible-role-tailscale/
 │   ├── assert.yml           # Variable validation and system checks
 │   ├── prerequisites.yml    # System preparation
 │   ├── install.yml          # Package installation
-│   ├── repository.yml       # Repository configuration
+│   ├── repository.yml       # Repository configuration (OS-family dispatcher)
+│   ├── repository_debian.yml # APT repository configuration (Debian/Ubuntu)
+│   ├── repository_redhat.yml # DNF repository configuration (EL9)
 │   ├── service.yml          # Service management
 │   ├── validate.yml         # System validation and diagnostics
 │   ├── logging.yml          # Dedicated logging configuration
@@ -561,6 +586,7 @@ ansible-role-tailscale/
     ├── main.yml             # Internal role variables
     ├── debian_12.yml        # Debian 12 specific variables
     ├── debian_13.yml        # Debian 13 specific variables
+    ├── redhat_9.yml         # EL9 specific variables (Rocky/RHEL/Alma 9)
     └── ubuntu_24.04.yml     # Ubuntu 24.04 specific variables
 ```
 
@@ -681,6 +707,21 @@ ansible-role-tailscale/
       --accept-routes
       --accept-dns
   
+  roles:
+    - role: grzegorzfranus.tailscale
+
+# Example: EL9 (Rocky Linux 9, RHEL 9) Installation
+- name: Configure Tailscale on EL9
+  hosts: el9_servers
+  become: true
+  vars:
+    tailscale_auth_key: "{{ vault_tailscale_auth_key }}"
+    tailscale_extra_args: >-
+      --hostname={{ inventory_hostname }}-el9
+      --accept-routes
+      --accept-dns
+    tailscale_track: "stable"
+
   roles:
     - role: grzegorzfranus.tailscale
 ```

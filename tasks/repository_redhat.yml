@@ -1,0 +1,51 @@
+---
+# Tailscale Repository (RedHat) — Configure DNF repository and GPG keys for EL9.
+
+- name: Tailscale | repository | Import Tailscale GPG key
+  become: true
+  ansible.builtin.rpm_key:
+    key: "{{ __tailscale_os_repo_key_url }}"
+    state: present
+  register: __tailscale_key_import
+  retries: 3
+  delay: 5
+  until: __tailscale_key_import is succeeded
+
+- name: Tailscale | repository | Add Tailscale DNF repository
+  become: true
+  ansible.builtin.yum_repository:
+    name: tailscale-stable
+    description: "Tailscale {{ tailscale_track }} repository"
+    baseurl: "https://pkgs.tailscale.com/{{ tailscale_track }}/rhel/$releasever/$basearch"
+    gpgcheck: true
+    repo_gpgcheck: true
+    gpgkey: "{{ __tailscale_os_repo_key_url }}"
+    enabled: true
+  register: __tailscale_repo_added
+
+- name: Tailscale | repository | Update package cache
+  become: true
+  ansible.builtin.dnf:
+    update_cache: true
+  register: __tailscale_cache_update
+  retries: 3
+  delay: 5
+  until: __tailscale_cache_update is succeeded
+  when:
+    - not ansible_check_mode
+
+- name: Tailscale | repository | Verify repository configuration
+  ansible.builtin.command: "dnf repolist tailscale-stable"
+  register: __tailscale_repo_verification
+  changed_when: false
+  failed_when:
+    - __tailscale_repo_verification.rc != 0
+
+- name: Tailscale | repository | Display repository verification
+  ansible.builtin.debug:
+    msg:
+      - "Repository configured: {{ __tailscale_os_repo_url }}"
+      - "   Track: {{ tailscale_track }}"
+    verbosity: 1
+  when:
+    - tailscale_collect_system_info | bool

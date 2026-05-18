@@ -17,12 +17,33 @@
     repo: "deb [signed-by={{ __tailscale_os_repo_key_path }}] https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_facts['distribution'] | lower }} {{ __tailscale_version_codename }} main"
     filename: tailscale
     state: absent
+  when:
+    - ansible_facts['os_family'] == 'Debian'
 
-- name: Tailscale | remove | Remove repository keyring
+- name: Tailscale | remove | Remove repository keyring (Debian)
   become: true
   ansible.builtin.file:
     path: "{{ __tailscale_os_repo_key_path }}"
     state: absent
+  when:
+    - ansible_facts['os_family'] == 'Debian'
+
+- name: Tailscale | remove | Remove DNF repository (RedHat)
+  become: true
+  ansible.builtin.yum_repository:
+    name: tailscale-stable
+    state: absent
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+
+- name: Tailscale | remove | Remove RPM GPG key (RedHat)
+  become: true
+  ansible.builtin.rpm_key:
+    key: "{{ __tailscale_os_repo_key_url }}"
+    state: absent
+  failed_when: false
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
 
 - name: Tailscale | remove | Remove tailscale package
   become: true
