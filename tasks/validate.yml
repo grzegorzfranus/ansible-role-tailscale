@@ -70,7 +70,7 @@
   ansible.builtin.set_fact:
     __tailscale_version_codename: "{{ ansible_facts['distribution_release'] }}"
   when:
-    - ansible_facts['os_family'] == 'Debian'"
+    - ansible_facts['os_family'] == 'Debian'
 
 - name: Tailscale | validate | Detect service startup requirements
   ansible.builtin.set_fact:
