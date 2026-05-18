@@ -120,15 +120,13 @@
   when:
     - tailscale_validate_connectivity | bool
 
-- name: Tailscale | validate | Assert repository connectivity
-  ansible.builtin.assert:
-    that:
-      - (__tailscale_repo_connectivity.status | default(0)) == 200
-    fail_msg: "Cannot reach Tailscale repository. Status: {{ __tailscale_repo_connectivity.status | default('No response') }}"
-    success_msg: "Tailscale repository is accessible"
+- name: Tailscale | validate | Warn about repository connectivity
+  ansible.builtin.debug:
+    msg: "Warning: Cannot reach Tailscale repository (status: {{ __tailscale_repo_connectivity.status | default('No response') }}). Installation may still succeed."
   when:
     - tailscale_validate_connectivity | bool
     - __tailscale_repo_connectivity is defined
+    - (__tailscale_repo_connectivity.status | default(0)) != 200
 
 - name: Tailscale | validate | Warn about API connectivity
   ansible.builtin.debug:
