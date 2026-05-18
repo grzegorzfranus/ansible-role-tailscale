@@ -123,7 +123,7 @@
 - name: Tailscale | validate | Assert repository connectivity
   ansible.builtin.assert:
     that:
-      - __tailscale_repo_connectivity.status | default(0) == 200
+      - (__tailscale_repo_connectivity.status | default(0)) == 200
     fail_msg: "Cannot reach Tailscale repository. Status: {{ __tailscale_repo_connectivity.status | default('No response') }}"
     success_msg: "Tailscale repository is accessible"
   when:
@@ -136,7 +136,7 @@
   when:
     - tailscale_validate_connectivity | bool
     - __tailscale_api_connectivity is defined
-    - __tailscale_api_connectivity.status | default(0) != 200
+    - (__tailscale_api_connectivity.status | default(0)) != 200
 
 - name: Tailscale | validate | Collect comprehensive system information
   ansible.builtin.set_fact:
