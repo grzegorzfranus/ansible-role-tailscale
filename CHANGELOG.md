@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-05-18
+
+### Added
+- **Enterprise Linux 9 support**: Rocky Linux 9, RHEL 9, AlmaLinux 9, CentOS Stream 9
+- New `vars/redhat_9.yml` with EL9-specific repository URLs, prerequisites, and logging defaults
+- New `tasks/repository_redhat.yml` with DNF repository and RPM GPG key management
+- New `tasks/repository_debian.yml` extracted from original `repository.yml`
+- RedHat-family diagnostics in error reporting (checks `/etc/yum.repos.d` and `/etc/pki/rpm-gpg`)
+- Rocky Linux 9 added to CI/CD molecule test matrix
+- RPM-based package and repository verification in all molecule scenarios
+
+### Changed
+- `tasks/repository.yml` refactored to OS-family dispatcher pattern (includes `repository_debian.yml` or `repository_redhat.yml`)
+- `tasks/validate.yml` extended for RedHat OS family, EL9 distribution checks, and OS-aware connectivity tests
+- `tasks/assert.yml` relaxed repo key URL regex (supports both `.gpg` and RedHat patterns), `apt_key_type` validation skipped on RedHat
+- `tasks/remove.yml` OS-family conditions added to Debian tasks, new RedHat removal tasks (DNF repo, RPM key)
+- `tasks/logging.yml` uses OS-aware log user/group (`root:root` on EL9 via `__tailscale_os_log_user/group`)
+- `tasks/error_reporting.yml` OS-family conditions for repository and key diagnostics, OS-aware syslog path
+- `vars/main.yml` added `dnf` to supported package managers, RedHat repo URL fallback, OS-specific logging defaults
+- `meta/main.yml` added EL platform with version 9
+- `meta/argument_specs.yml` updated description to include EL9
+- All molecule scenarios updated with RedHat pre_tasks and preparation steps
+- Service file verification in molecule checks both Debian (`/lib/systemd/system/`) and RedHat (`/usr/lib/systemd/system/`) paths
+
 ## [1.4.1] - 2026-05-18
 
 ### Fixed

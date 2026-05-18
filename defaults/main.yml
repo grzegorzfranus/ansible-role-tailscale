@@ -9,6 +9,7 @@
 # - Ubuntu 24.04 (Noble) and variants
 # - Debian 13 (Trixie) and variants
 # - Debian 12 (Bookworm) and variants
+# - EL9: Rocky Linux 9, RHEL 9, AlmaLinux 9, CentOS Stream 9
 #
 # Sections:
 #   1. Authentication Settings

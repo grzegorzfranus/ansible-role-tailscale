@@ -13,6 +13,13 @@
       when:
         - ansible_facts['os_family'] == "Debian"
 
+    - name: Converge | Update dnf cache
+      ansible.builtin.dnf:
+        update_cache: true
+      changed_when: false
+      when:
+        - ansible_facts['os_family'] == "RedHat"
+
   vars:
     tailscale_auth_key: ""
     tailscale_track: "stable"

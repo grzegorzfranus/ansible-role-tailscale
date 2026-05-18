@@ -1,14 +1,20 @@
 ---
 # Tailscale Logging — Configure rsyslog, systemd journal, and logrotate.
 
+- name: Tailscale | logging | Install rsyslog package
+  become: true
+  ansible.builtin.package:
+    name: rsyslog
+    state: present
+
 - name: Tailscale | logging | Create Tailscale log directory
   become: true
   ansible.builtin.file:
     path: "{{ tailscale_log_dir }}"
     state: directory
     mode: "{{ tailscale_log_dir_permissions }}"
-    owner: "{{ tailscale_log_user }}"
-    group: "{{ tailscale_log_group }}"
+    owner: "{{ __tailscale_os_log_user | default(tailscale_log_user) }}"
+    group: "{{ __tailscale_os_log_group | default(tailscale_log_group) }}"
 
 - name: Tailscale | logging | Create Tailscale log file
   become: true
@@ -16,16 +22,10 @@
     path: "{{ tailscale_log_file }}"
     state: touch
     mode: "{{ tailscale_log_file_permissions }}"
-    owner: "{{ tailscale_log_user }}"
-    group: "{{ tailscale_log_group }}"
+    owner: "{{ __tailscale_os_log_user | default(tailscale_log_user) }}"
+    group: "{{ __tailscale_os_log_group | default(tailscale_log_group) }}"
     modification_time: preserve
     access_time: preserve
-
-- name: Tailscale | logging | Install rsyslog package
-  become: true
-  ansible.builtin.package:
-    name: rsyslog
-    state: present
 
 - name: Tailscale | logging | Ensure rsyslog.d directory exists
   become: true
@@ -87,8 +87,8 @@
     path: "{{ tailscale_logrotate_options.olddir }}"
     state: directory
     mode: "{{ tailscale_log_dir_permissions }}"
-    owner: "{{ tailscale_log_user }}"
-    group: "{{ tailscale_log_group }}"
+    owner: "{{ __tailscale_os_log_user | default(tailscale_log_user) }}"
+    group: "{{ __tailscale_os_log_group | default(tailscale_log_group) }}"
   when:
     - tailscale_logrotate_options.enabled | bool
     - tailscale_logrotate_options.olddir | length > 0

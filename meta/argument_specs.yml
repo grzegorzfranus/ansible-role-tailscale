@@ -1,10 +1,10 @@
 ---
 argument_specs:
   main:
-    short_description: "Install and configure Tailscale VPN on Debian-based systems"
+    short_description: "Install and configure Tailscale VPN on Debian-based and EL9 systems"
     description:
       - "Installs Tailscale, configures the service, and optionally authenticates with a Tailscale network."
-      - "Supports Ubuntu 24.04, Debian 12 (Bookworm), and Debian 13 (Trixie)."
+      - "Supports Ubuntu 24.04, Debian 12 (Bookworm), Debian 13 (Trixie), and EL9 (Rocky Linux 9, RHEL 9, AlmaLinux 9)."
     author: "Grzegorz Franus"
 
     options:

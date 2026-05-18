@@ -6,7 +6,8 @@
   gather_facts: true
 
   tasks:
-    - name: Verify | Check if Tailscale package is installed
+    # --- Debian package verification ---
+    - name: Verify | Check if Tailscale package is installed (dpkg)
       ansible.builtin.command: "dpkg -l tailscale"
       register: __verify_package_check
       failed_when: false
@@ -14,7 +15,7 @@
       when:
         - ansible_facts['pkg_mgr'] == 'apt'
 
-    - name: Verify | Assert Tailscale package is installed
+    - name: Verify | Assert Tailscale package is installed (dpkg)
       ansible.builtin.assert:
         that:
           - __verify_package_check['rc'] == 0
@@ -24,7 +25,7 @@
       when:
         - ansible_facts['pkg_mgr'] == 'apt'
 
-    - name: Verify | Check if Tailscale repository is configured
+    - name: Verify | Check if Tailscale repository is configured (apt)
       ansible.builtin.find:
         paths: "/etc/apt/sources.list.d"
         patterns: "*tailscale*"
@@ -32,7 +33,7 @@
       when:
         - ansible_facts['pkg_mgr'] == 'apt'
 
-    - name: Verify | Assert repository configuration exists
+    - name: Verify | Assert repository configuration exists (apt)
       ansible.builtin.assert:
         that:
           - __verify_repo_files['files'] | length > 0
@@ -41,6 +42,42 @@
       when:
         - ansible_facts['pkg_mgr'] == 'apt'
 
+    # --- RedHat package verification ---
+    - name: Verify | Check if Tailscale package is installed (rpm)
+      ansible.builtin.command: "rpm -q tailscale"
+      register: __verify_rpm_check
+      failed_when: false
+      changed_when: false
+      when:
+        - ansible_facts['pkg_mgr'] == 'dnf'
+
+    - name: Verify | Assert Tailscale package is installed (rpm)
+      ansible.builtin.assert:
+        that:
+          - __verify_rpm_check['rc'] == 0
+        fail_msg: "Tailscale RPM package is not installed"
+        success_msg: "Tailscale RPM package installation verified"
+      when:
+        - ansible_facts['pkg_mgr'] == 'dnf'
+
+    - name: Verify | Check if Tailscale repository is configured (dnf)
+      ansible.builtin.find:
+        paths: "/etc/yum.repos.d"
+        patterns: "*tailscale*"
+      register: __verify_dnf_repo_files
+      when:
+        - ansible_facts['pkg_mgr'] == 'dnf'
+
+    - name: Verify | Assert repository configuration exists (dnf)
+      ansible.builtin.assert:
+        that:
+          - __verify_dnf_repo_files['files'] | length > 0
+        fail_msg: "Tailscale DNF repository configuration not found"
+        success_msg: "Tailscale DNF repository configuration verified"
+      when:
+        - ansible_facts['pkg_mgr'] == 'dnf'
+
+    # --- Common binary verification ---
     - name: Verify | Check if Tailscale client binary exists
       ansible.builtin.stat:
         path: "/usr/bin/tailscale"
@@ -76,17 +113,28 @@
       ansible.builtin.debug:
         msg: "Tailscale version: {{ __verify_version_check['stdout'] }}"
 
-    - name: Verify | Check if Tailscale service file exists
+    - name: Verify | Check if Tailscale service file exists (Debian)
       ansible.builtin.stat:
         path: "/lib/systemd/system/tailscaled.service"
-      register: __verify_service_file
+      register: __verify_service_file_debian
       when:
         - ansible_facts['service_mgr'] == 'systemd'
+        - ansible_facts['os_family'] == 'Debian'
+
+    - name: Verify | Check if Tailscale service file exists (RedHat)
+      ansible.builtin.stat:
+        path: "/usr/lib/systemd/system/tailscaled.service"
+      register: __verify_service_file_redhat
+      when:
+        - ansible_facts['service_mgr'] == 'systemd'
+        - ansible_facts['os_family'] == 'RedHat'
 
     - name: Verify | Assert service file exists
       ansible.builtin.assert:
         that:
-          - __verify_service_file['stat']['exists']
+          - >-
+            (__verify_service_file_debian['stat']['exists'] | default(false)) or
+            (__verify_service_file_redhat['stat']['exists'] | default(false))
         fail_msg: "Tailscale service file not found"
         success_msg: "Tailscale service file verified"
       when:

@@ -1,0 +1,17 @@
+---
+# Ansible Role: Tailscale - RedHat 9 (EL9) OS-specific constants
+# Covers: Rocky Linux 9, RHEL 9, AlmaLinux 9, CentOS Stream 9
+
+# Repository configuration (internal, not user-overridable)
+__tailscale_os_repo_url: "https://pkgs.tailscale.com/{{ tailscale_track }}/rhel/9/tailscale.repo"
+__tailscale_os_repo_key_url: "https://pkgs.tailscale.com/{{ tailscale_track }}/rhel/9/repo.gpg"
+__tailscale_os_repo_key_path: "/etc/pki/rpm-gpg/tailscale-repo.gpg"
+
+# OS-specific prerequisite packages (internal)
+__tailscale_os_prerequisites:
+  - dnf-plugins-core
+
+# Logging defaults for EL9 (rsyslog user/group differs from Debian)
+__tailscale_os_log_user: "root"
+__tailscale_os_log_group: "root"
+__tailscale_os_syslog_path: "/var/log/messages"

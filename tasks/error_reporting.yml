@@ -49,7 +49,7 @@
   when:
     - tailscale_include_package_info | bool
 
-- name: Tailscale | error | Check current repository configuration
+- name: Tailscale | error | Check current repository configuration (Debian)
   ansible.builtin.find:
     paths: "/etc/apt/sources.list.d"
     patterns: "*tailscale*"
@@ -57,9 +57,9 @@
   failed_when: false
   when:
     - tailscale_include_package_info | bool
-    - ansible_facts['pkg_mgr'] == 'apt'
+    - ansible_facts['os_family'] == 'Debian'
 
-- name: Tailscale | error | Check GPG keys
+- name: Tailscale | error | Check GPG keys (Debian)
   ansible.builtin.find:
     paths: "/usr/share/keyrings"
     patterns: "*tailscale*"
@@ -67,7 +67,27 @@
   failed_when: false
   when:
     - tailscale_include_package_info | bool
-    - ansible_facts['pkg_mgr'] == 'apt'
+    - ansible_facts['os_family'] == 'Debian'
+
+- name: Tailscale | error | Check current repository configuration (RedHat)
+  ansible.builtin.find:
+    paths: "/etc/yum.repos.d"
+    patterns: "*tailscale*"
+  register: __tailscale_existing_repos
+  failed_when: false
+  when:
+    - tailscale_include_package_info | bool
+    - ansible_facts['os_family'] == 'RedHat'
+
+- name: Tailscale | error | Check GPG keys (RedHat)
+  ansible.builtin.find:
+    paths: "/etc/pki/rpm-gpg"
+    patterns: "*tailscale*"
+  register: __tailscale_existing_keys
+  failed_when: false
+  when:
+    - tailscale_include_package_info | bool
+    - ansible_facts['os_family'] == 'RedHat'
 
 - name: Tailscale | error | Collect network configuration
   ansible.builtin.set_fact:
@@ -116,13 +136,12 @@
     - tailscale_error_log_lines > 0
 
 - name: Tailscale | error | Collect system logs
-  ansible.builtin.command: "tail -n {{ tailscale_error_log_lines }} /var/log/syslog"
+  ansible.builtin.command: "tail -n {{ tailscale_error_log_lines }} {{ __tailscale_os_syslog_path | default('/var/log/syslog') }}"
   register: __tailscale_syslog
   failed_when: false
   changed_when: false
   when:
     - tailscale_error_log_lines > 0
-    - ansible_facts['os_family'] == 'Debian'
 
 - name: Tailscale | error | Generate comprehensive error report
   ansible.builtin.set_fact:
@@ -154,7 +173,7 @@
         existing_repos: "{{ __tailscale_existing_repos.files | default([]) | map(attribute='path') | list }}"
         existing_keys: "{{ __tailscale_existing_keys.files | default([]) | map(attribute='path') | list }}"
         repo_key_url: "{{ __tailscale_os_repo_key_url }}"
-        repo_list_url: "{{ __tailscale_os_repo_list_url }}"
+        repo_list_url: "{{ __tailscale_os_repo_list_url | default(__tailscale_os_repo_url) }}"
       logs:
         journal: "{{ __tailscale_journal_logs.stdout | default('not_collected') if __tailscale_journal_logs is defined else 'not_available' }}"
         syslog: "{{ __tailscale_syslog.stdout | default('not_collected') if __tailscale_syslog is defined else 'not_available' }}"

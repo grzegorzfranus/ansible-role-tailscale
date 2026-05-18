@@ -1,0 +1,72 @@
+---
+# Tailscale Repository (Debian) — Configure APT repository and GPG keys.
+
+- name: Tailscale | repository | Create keyrings directory
+  become: true
+  ansible.builtin.file:
+    path: "/usr/share/keyrings"
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Tailscale | repository | Create sources.list.d directory
+  become: true
+  ansible.builtin.file:
+    path: "/etc/apt/sources.list.d"
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Tailscale | repository | Add repository key (Keyring Method)
+  become: true
+  ansible.builtin.get_url:
+    url: "{{ __tailscale_os_repo_key_url }}"
+    dest: "{{ __tailscale_os_repo_key_path }}"
+    mode: '0644'
+    owner: root
+    group: root
+  timeout: "{{ tailscale_connectivity_timeout }}"
+  retries: 3
+  delay: 5
+  register: __tailscale_key_download
+  until: __tailscale_key_download is succeeded
+
+- name: Tailscale | repository | Configure apt repository
+  become: true
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by={{ __tailscale_os_repo_key_path }}] https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_facts['distribution'] | lower }} {{ __tailscale_version_codename }} main"
+    filename: tailscale
+    state: present
+  register: __tailscale_repo_added
+
+- name: Tailscale | repository | Update package cache
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 0
+  register: __tailscale_cache_update
+  retries: 3
+  delay: 5
+  until: __tailscale_cache_update is succeeded
+  when:
+    - not ansible_check_mode
+
+- name: Tailscale | repository | Verify repository configuration
+  ansible.builtin.command: "apt-cache policy tailscale"
+  register: __tailscale_repo_verification
+  changed_when: false
+  failed_when:
+    - __tailscale_repo_verification.rc != 0
+    - "'No packages found' in __tailscale_repo_verification.stderr"
+
+- name: Tailscale | repository | Display repository verification
+  ansible.builtin.debug:
+    msg:
+      - "Repository configured: {{ __tailscale_os_repo_list_url }}"
+      - "   GPG Key Method: {{ __tailscale_detected_key_method }}"
+      - "   Track: {{ tailscale_track }}"
+    verbosity: 1
+  when:
+    - tailscale_collect_system_info | bool
