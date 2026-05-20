@@ -1,0 +1,13 @@
+---
+name: "CI"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    uses: grzegorzfranus/github-actions-workflows/.github/workflows/ansible-ci.yml@main
+    with:
+      molecule-distros: '["ubuntu2404", "debian12", "debian13", "rockylinux9"]'
