@@ -1,8 +1,8 @@
 # Ansible Role: Tailscale
 
-|Source|Version|Tests|License|
-|------|-------|-------|-------|
-|[![Source Code](https://img.shields.io/badge/source-github-blue.svg)](https://github.com/grzegorzfranus/ansible-role-tailscale)|[![Version](https://img.shields.io/github/v/release/grzegorzfranus/ansible-role-tailscale)](https://github.com/grzegorzfranus/ansible-role-tailscale/releases)|[![tests](https://github.com/grzegorzfranus/ansible-role-tailscale/actions/workflows/test-and-validation.yml/badge.svg)](https://github.com/grzegorzfranus/ansible-role-tailscale/actions)|[![Repository License](https://img.shields.io/badge/license-apache2.0-brightgreen.svg)](LICENSE)|
+|Source|Version|CI|License|
+|------|-------|--|-------|
+|[![Source Code](https://img.shields.io/badge/source-github-blue.svg)](https://github.com/grzegorzfranus/ansible-role-tailscale)|[![Version](https://img.shields.io/github/v/release/grzegorzfranus/ansible-role-tailscale)](https://github.com/grzegorzfranus/ansible-role-tailscale/releases)|[![CI](https://github.com/grzegorzfranus/ansible-role-tailscale/actions/workflows/ci.yml/badge.svg)](https://github.com/grzegorzfranus/ansible-role-tailscale/actions/workflows/ci.yml)|[![Repository License](https://img.shields.io/badge/license-apache2.0-brightgreen.svg)](LICENSE)|
 
 This Ansible role installs and configures Tailscale, a modern VPN service that creates secure point-to-point connections between devices. It provides zero-configuration networking with end-to-end encryption, automatic key rotation, and seamless cross-platform connectivity.
 
@@ -534,8 +534,10 @@ If you encounter the error `Recursive loop detected in template: maximum recursi
 ansible-role-tailscale/
 ├── .github/                  # GitHub Actions workflows
 │   └── workflows/           # CI/CD automation
-│       ├── publish-to-galaxy.yml   # Ansible Galaxy publish workflow
-│       └── test-and-validation.yml # CI/CD Testing and validation workflow
+│       ├── ci.yml                  # CI pipeline (reusable ansible-ci.yml)
+│       └── release.yml            # Release Please + Galaxy publish
+├── .release-please-manifest.json # Release Please version manifest
+├── release-please-config.json    # Release Please configuration
 ├── CHANGELOG.md              # Version history and changes
 ├── LICENSE                   # Apache-2.0 license
 ├── README.md                # This documentation file
@@ -545,7 +547,7 @@ ansible-role-tailscale/
 │   └── main.yml             # Service restart and reload handlers
 ├── meta/
 │   ├── main.yml             # Role metadata and Galaxy information
-│   └── argument_specs.yml   # Ansible-native argument validation (CoP §3.1.20)
+│   └── argument_specs.yml   # Ansible-native argument validation
 ├── molecule/                 # Molecule testing framework
 │   ├── default/             # Default test scenario
 │   │   ├── molecule.yml     # Test configuration
@@ -730,13 +732,19 @@ ansible-role-tailscale/
 
 Contributions, bug reports, and feature requests are welcome!
 
-- Fork the repository and create your branch from `main`.
-- Make your changes with clear, descriptive commit messages.
-- Ensure your code passes all Molecule and lint tests.
-- Submit a pull request describing your changes and the motivation.
-- For major changes, please open an issue first to discuss what you would like to change.
-
-If you have questions or suggestions, feel free to open an issue or contact the author via GitHub.
+- Fork the repository and create your branch from `main`
+- Use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages:
+  - `feat:` — new features (minor version bump)
+  - `fix:` — bug fixes (patch version bump)
+  - `docs:` — documentation changes
+  - `refactor:` — code refactoring
+  - `test:` — test additions
+  - `ci:` — CI/CD changes
+  - `chore:` — maintenance tasks
+- Use branch naming convention: `feature/`, `bugfix/`, `hotfix/`, `docs/`, `refactor/`, `test/`, `chore/`, `ci/`
+- Ensure your code passes all CI checks (YAML lint, Ansible lint, Molecule tests)
+- Submit a pull request describing your changes
+- For major changes, please open an issue first to discuss what you would like to change
 
 ## 📝 License
 

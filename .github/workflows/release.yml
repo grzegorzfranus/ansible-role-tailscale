@@ -23,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       prs_created: ${{ steps.release.outputs.prs_created }}
+      release_created: ${{ steps.release.outputs.release_created }}
     steps:
       - name: "Run Release Please"
         uses: googleapis/release-please-action@v4
@@ -84,3 +85,21 @@ jobs:
             -f context="Merge Check" \
             -f description="All validations passed (Release PR)"
           echo "Set 'Merge Check' status on commit $PR_SHA"
+
+  # ================================================================
+  # 3. PUBLISH TO ANSIBLE GALAXY
+  # ----------------------------------------------------------------
+  # Triggered only when Release Please creates a GitHub Release
+  # (i.e., when the Release PR is merged). Uses the centralized
+  # reusable publish workflow with retry logic.
+  #
+  # This job lives here (not in a separate publish.yml) because
+  # events emitted by GITHUB_TOKEN do not trigger other workflows.
+  # ================================================================
+  publish-to-galaxy:
+    name: "Publish to Galaxy"
+    needs: [release-please]
+    if: needs.release-please.outputs.release_created == 'true'
+    uses: grzegorzfranus/github-actions-workflows/.github/workflows/ansible-publish-galaxy.yml@main
+    secrets:
+      galaxy-api-key: ${{ secrets.GALAXY_API_KEY }}
