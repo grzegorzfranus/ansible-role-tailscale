@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0](https://github.com/grzegorzfranus/ansible-role-tailscale/compare/v1.5.0...v1.6.0) (2026-05-21)
+
+
+### Features
+
+* add automated versioning and Galaxy publish pipeline ([#7](https://github.com/grzegorzfranus/ansible-role-tailscale/issues/7)) ([91f460e](https://github.com/grzegorzfranus/ansible-role-tailscale/commit/91f460eb65bc39fadb6a8947eea8903272d233b7))
+* migrate CI to centralized reusable workflow ([#6](https://github.com/grzegorzfranus/ansible-role-tailscale/issues/6)) ([4c0fd79](https://github.com/grzegorzfranus/ansible-role-tailscale/commit/4c0fd795664e7bc6f61185529cb632c2a78d6a5e))
+
 ## [1.5.0] - 2026-05-18
 
 ### Added
