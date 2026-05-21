@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1](https://github.com/grzegorzfranus/ansible-role-tailscale/compare/v1.6.0...v1.6.1) (2026-05-21)
+
+
+### Bug Fixes
+
+* remove duplicate CI runs, fix Galaxy publish, update docs ([#9](https://github.com/grzegorzfranus/ansible-role-tailscale/issues/9)) ([a4d80dc](https://github.com/grzegorzfranus/ansible-role-tailscale/commit/a4d80dc4bd1cd7c4b792f228ea2199c0122f1a7a))
+
 ## [1.6.0](https://github.com/grzegorzfranus/ansible-role-tailscale/compare/v1.5.0...v1.6.0) (2026-05-21)
 
 
