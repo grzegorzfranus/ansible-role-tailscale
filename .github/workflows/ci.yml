@@ -33,7 +33,7 @@ jobs:
             exit 0
           fi
 
-          REGEX="^(feature|bugfix|hotfix|release|docs|refactor|test|chore|ci)/.+"
+          REGEX="^(feature|bugfix|hotfix|release|docs|refactor|test|chore|ci)/.+|^release-please--.*"
 
           if [[ ! "$BRANCH_NAME" =~ $REGEX ]]; then
             echo "::error::Invalid branch name: '$BRANCH_NAME'"
