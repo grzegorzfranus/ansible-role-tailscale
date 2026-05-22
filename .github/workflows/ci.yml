@@ -80,7 +80,7 @@ jobs:
   # ================================================================
   ci:
     needs: [branch-name-lint]
-    uses: grzegorzfranus/github-actions-workflows/.github/workflows/ansible-ci.yml@v0.7.1
+    uses: grzegorzfranus/github-actions-workflows/.github/workflows/ansible-ci.yml@main
     with:
       molecule-distros: '["ubuntu2404", "debian12", "debian13", "rockylinux9"]'
 
