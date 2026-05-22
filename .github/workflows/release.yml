@@ -17,6 +17,7 @@ jobs:
   # Analyzes Conventional Commits since last release and creates
   # or updates a Release PR. When the Release PR is merged, it
   # creates a Git tag and GitHub Release automatically.
+  # Note: Commits must follow the Conventional Commits specification.
   # ================================================================
   release-please:
     name: "Release Please"
