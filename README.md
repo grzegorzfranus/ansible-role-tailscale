@@ -603,7 +603,7 @@ ansible-role-tailscale/
 - `configure` - Service and role configuration tasks
 - `logrotate` - Logrotate-specific configuration tasks
 
-## Example Playbook
+## Example Playbooks
 
 ```yaml
 ---
