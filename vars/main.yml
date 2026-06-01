@@ -1,6 +1,11 @@
 ---
-# Ansible Role: Tailscale - Internal constants and computed values
+# =============================================================================
+# Ansible Role: Tailscale - Internal Variables
+# =============================================================================
+# Internal constants and computed values.
 # These are NOT user-overridable. All use double-underscore prefix per CoP §3.1.4.
+# =============================================================================
+
 
 # Service name — constant across all supported distributions
 __tailscale_service_name: "tailscaled"

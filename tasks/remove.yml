@@ -1,5 +1,9 @@
 ---
-# Tailscale Remove — Clean uninstall of Tailscale and all configuration.
+# =============================================================================
+# Ansible Role: Tailscale - Tasks: Remove
+# =============================================================================
+# Clean uninstall of Tailscale and all configuration.
+# =============================================================================
 
 - name: Tailscale | remove | Stop and disable service (systemd)
   become: true

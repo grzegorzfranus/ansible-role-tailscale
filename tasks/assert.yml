@@ -1,7 +1,11 @@
 ---
-# Tailscale Assert — Runtime validation of variable values.
+# =============================================================================
+# Ansible Role: Tailscale - Tasks: Assert
+# =============================================================================
+# Runtime validation of variable values.
 # Basic type/choice validation is handled by meta/argument_specs.yml.
 # This file performs runtime-only checks (regex patterns, content validation, cross-field logic).
+# =============================================================================
 
 - name: Tailscale | assert | Validate repository key URL
   ansible.builtin.assert:

@@ -41,6 +41,7 @@ Device A ←→ Device B ←→ Device C
 ## 📋 Requirements
 
 - **Ansible**: 2.16 or higher
+- **Python**: 3.9 or higher on target hosts
 - **Network**: Internet access for Tailscale coordination server
 - **Privileges**: sudo/root access on target hosts
 - **Account**: Active Tailscale account with auth keys
@@ -54,6 +55,8 @@ List of officially supported operating systems for this role:
 | Debian | 13 (Trixie)   | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Debian | 12 (Bookworm) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | EL (RHEL, Rocky, Alma, Oracle) | 9 | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
+
+> **Note**: EL 8 is not supported — `python3-dnf` bindings are compiled for Python 3.6, which is incompatible with ansible-core >= 2.17. Use EL 9 or newer.
 
 ### Ansible version
 

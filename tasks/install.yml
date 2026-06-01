@@ -1,6 +1,11 @@
 ---
-# Tailscale Install — Install the Tailscale package and verify binaries.
+# =============================================================================
+# Ansible Role: Tailscale - Tasks: Install
+# =============================================================================
+# Install the Tailscale package and verify binaries.
+# =============================================================================
 
+# Justification: Use command module as there is no native Ansible module to query the installed tailscale version.
 - name: Tailscale | install | Check if Tailscale is already installed
   ansible.builtin.command: "tailscale version"
   register: __tailscale_existing_version
@@ -25,6 +30,7 @@
   retries: 3
   delay: 10
 
+# Justification: Use command module as there is no native Ansible module to verify the package installation via tailscale CLI execution.
 - name: Tailscale | install | Verify Tailscale installation
   ansible.builtin.command: "tailscale version"
   register: __tailscale_installed_version

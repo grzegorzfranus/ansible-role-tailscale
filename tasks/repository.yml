@@ -1,5 +1,9 @@
 ---
-# Tailscale Repository — OS-family dispatcher for package repository configuration.
+# =============================================================================
+# Ansible Role: Tailscale - Tasks: Repository
+# =============================================================================
+# OS-family dispatcher for package repository configuration.
+# =============================================================================
 
 - name: Tailscale | repository | Configure Debian-family repositories
   ansible.builtin.include_tasks: repository_debian.yml

@@ -1,5 +1,9 @@
 ---
-# Tailscale Handlers — Service management operations triggered by tasks.
+# =============================================================================
+# Ansible Role: Tailscale - Handlers
+# =============================================================================
+# Service management operations triggered by tasks.
+# =============================================================================
 
 - name: Tailscale | handlers | Restart Tailscale service
   become: true
