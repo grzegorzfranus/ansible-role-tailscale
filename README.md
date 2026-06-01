@@ -53,9 +53,7 @@ List of officially supported operating systems for this role:
 | Ubuntu | 24.04 (Noble) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Debian | 13 (Trixie)   | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Debian | 12 (Bookworm) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
-| Rocky Linux | 9 | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
-| RHEL | 9 | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
-| AlmaLinux | 9 | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
+| EL (RHEL, Rocky, Alma, Oracle) | 9 | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 
 ### Ansible version
 
