@@ -1,8 +1,11 @@
 ---
-# Ansible Role: Tailscale - RedHat 9 (EL9) OS-specific constants
-# Covers: Rocky Linux 9, RHEL 9, AlmaLinux 9, CentOS Stream 9
+# =============================================================================
+# Ansible Role: Tailscale - RedHat 9 (EL9) Variables
+# =============================================================================
+# OS-specific internal constants and computed values.
+# These are NOT user-overridable. All use double-underscore prefix per CoP §3.1.4.
+# =============================================================================
 
-# Repository configuration (internal, not user-overridable)
 __tailscale_os_repo_url: "https://pkgs.tailscale.com/{{ tailscale_track }}/rhel/9/tailscale.repo"
 __tailscale_os_repo_key_url: "https://pkgs.tailscale.com/{{ tailscale_track }}/rhel/9/repo.gpg"
 __tailscale_os_repo_key_path: "/etc/pki/rpm-gpg/tailscale-repo.gpg"

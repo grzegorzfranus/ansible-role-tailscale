@@ -1,5 +1,9 @@
 ---
-# Tailscale Validate — System validation, smart detection, and connectivity checks.
+# =============================================================================
+# Ansible Role: Tailscale - Tasks: Validate
+# =============================================================================
+# System validation, smart detection, and connectivity checks.
+# =============================================================================
 
 - name: Tailscale | validate | Check system architecture support
   ansible.builtin.assert:
@@ -32,6 +36,7 @@
   when:
     - tailscale_validate_prerequisites | bool
 
+# Justification: Use command module as there is no native Ansible module to locate the package manager binary using the 'which' executable.
 - name: Tailscale | validate | Detect package manager availability
   ansible.builtin.command: "which {{ ansible_facts['pkg_mgr'] }}"
   register: __tailscale_pkg_mgr_check

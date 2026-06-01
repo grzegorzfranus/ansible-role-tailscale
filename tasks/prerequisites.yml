@@ -1,5 +1,9 @@
 ---
-# Tailscale Prerequisites — Install required packages before Tailscale setup.
+# =============================================================================
+# Ansible Role: Tailscale - Tasks: Prerequisites
+# =============================================================================
+# Install required packages before Tailscale setup.
+# =============================================================================
 
 - name: Tailscale | prerequisites | Merge user and OS-specific package lists
   ansible.builtin.set_fact:
@@ -33,6 +37,7 @@
   retries: 3
   delay: 5
 
+# Justification: Use command module as there is no native Ansible module to locate binaries on the system path using the 'which' executable.
 - name: Tailscale | prerequisites | Verify package installation
   ansible.builtin.command: "which {{ item }}"
   register: __tailscale_package_verification

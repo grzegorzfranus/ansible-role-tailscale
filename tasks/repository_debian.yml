@@ -1,5 +1,9 @@
 ---
-# Tailscale Repository (Debian) — Configure APT repository and GPG keys.
+# =============================================================================
+# Ansible Role: Tailscale - Tasks: Repository Debian
+# =============================================================================
+# Configure APT repository and GPG keys for Debian-based systems.
+# =============================================================================
 
 - name: Tailscale | repository | Create keyrings directory
   become: true
@@ -53,6 +57,7 @@
   when:
     - not ansible_check_mode
 
+# Justification: Use command module as there is no native Ansible module to query the policy of a specific package from the APT cache.
 - name: Tailscale | repository | Verify repository configuration
   ansible.builtin.command: "apt-cache policy tailscale"
   register: __tailscale_repo_verification

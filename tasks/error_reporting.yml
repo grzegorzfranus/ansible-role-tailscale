@@ -1,5 +1,9 @@
 ---
-# Tailscale Error Reporting — Comprehensive diagnostic collection for troubleshooting.
+# =============================================================================
+# Ansible Role: Tailscale - Tasks: Error Reporting
+# =============================================================================
+# Comprehensive diagnostic collection for troubleshooting.
+# =============================================================================
 
 - name: Tailscale | error | Collect current error context
   ansible.builtin.set_fact:
@@ -118,6 +122,7 @@
     path: "/usr/bin/tailscale"
   register: __tailscale_binary_check
 
+# Justification: Use command module as there is no native Ansible module to retrieve the version of the Tailscale binary.
 - name: Tailscale | error | Get Tailscale version if available
   ansible.builtin.command: "/usr/bin/tailscale version"
   register: __tailscale_version_check
@@ -126,6 +131,7 @@
   when:
     - __tailscale_binary_check.stat.exists | default(false)
 
+# Justification: Use command module as there is no native Ansible module to query systemd journal logs.
 - name: Tailscale | error | Collect systemd journal logs
   ansible.builtin.command: "journalctl -u {{ __tailscale_service_name }} --lines={{ tailscale_error_log_lines }} --no-pager"
   register: __tailscale_journal_logs
@@ -135,6 +141,7 @@
     - ansible_facts['service_mgr'] == 'systemd'
     - tailscale_error_log_lines > 0
 
+# Justification: Use command module as there is no native Ansible module to tail system log files.
 - name: Tailscale | error | Collect system logs
   ansible.builtin.command: "tail -n {{ tailscale_error_log_lines }} {{ __tailscale_os_syslog_path | default('/var/log/syslog') }}"
   register: __tailscale_syslog

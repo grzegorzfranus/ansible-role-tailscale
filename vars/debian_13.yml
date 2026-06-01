@@ -1,7 +1,11 @@
 ---
-# Ansible Role: Tailscale - Debian 13 (Trixie) OS-specific constants
+# =============================================================================
+# Ansible Role: Tailscale - Debian 13 (Trixie) Variables
+# =============================================================================
+# OS-specific internal constants and computed values.
+# These are NOT user-overridable. All use double-underscore prefix per CoP §3.1.4.
+# =============================================================================
 
-# Repository configuration (internal, not user-overridable)
 __tailscale_os_repo_key_url: "https://pkgs.tailscale.com/stable/debian/trixie.noarmor.gpg"
 __tailscale_os_repo_key_path: "/usr/share/keyrings/tailscale-archive-keyring.gpg"
 __tailscale_os_repo_list_url: "https://pkgs.tailscale.com/stable/debian/trixie.tailscale-keyring.list"

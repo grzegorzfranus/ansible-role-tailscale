@@ -1,5 +1,9 @@
 ---
-# Tailscale Service — Configure service startup and management.
+# =============================================================================
+# Ansible Role: Tailscale - Tasks: Service
+# =============================================================================
+# Configure service startup and management.
+# =============================================================================
 
 - name: Tailscale | service | Detect optimal service manager
   ansible.builtin.set_fact:
