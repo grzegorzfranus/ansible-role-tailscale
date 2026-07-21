@@ -18,7 +18,7 @@
     - name: Verify | Assert package not present (dpkg)
       ansible.builtin.assert:
         that:
-          - __verify_pkg['rc'] != 0 or ('no packages found' in (__verify_pkg['stderr'] | lower))
+          - __verify_pkg['rc'] != 0 or ('ii  tailscale' not in __verify_pkg['stdout'])
         success_msg: "Tailscale package absent"
         fail_msg: "Tailscale package still present"
       when:

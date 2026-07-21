@@ -696,7 +696,7 @@ Automated via [Release Please](https://github.com/googleapis/release-please):
     tailscale_auth_key: "{{ vault_tailscale_subnet_key }}"
     tailscale_extra_args: >-
       --hostname={{ inventory_hostname }}-router
-      --advertise-routes=192.168.1.0/24,10.0.0.0/8
+      --advertise-routes=192.0.2.0/24,198.51.100.0/24
       --accept-routes
       --accept-dns
   

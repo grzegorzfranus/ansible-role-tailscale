@@ -109,6 +109,9 @@
   changed_when: false
   when:
     - tailscale_state | lower != 'absent'
+  tags:
+    - configure
+    - setup
 
 # Justification: Use command module as there is no native Ansible module to authenticate/register a node with the Tailscale control plane.
 # Authentication uses no_log to avoid leaking auth keys

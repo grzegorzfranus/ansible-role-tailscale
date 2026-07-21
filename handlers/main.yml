@@ -10,6 +10,8 @@
   ansible.builtin.service:
     name: "{{ __tailscale_service_name }}"
     state: restarted
+  when:
+    - tailscale_state | default('present') | lower != 'absent'
 
 - name: Tailscale | handlers | Reload systemd
   become: true
