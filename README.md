@@ -51,6 +51,7 @@ List of officially supported operating systems for this role:
 
 | OS Family | Version | Status |
 |-----------|---------|---------|
+| Ubuntu | 26.04 (Resolute) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Ubuntu | 24.04 (Noble) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Debian | 13 (Trixie)   | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Debian | 12 (Bookworm) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
@@ -598,7 +599,8 @@ ansible-role-tailscale/
     ├── debian_12.yml        # Debian 12 specific variables
     ├── debian_13.yml        # Debian 13 specific variables
     ├── redhat_9.yml         # EL9 specific variables (Rocky/RHEL/Alma 9)
-    └── ubuntu_24.04.yml     # Ubuntu 24.04 specific variables
+    ├── ubuntu_24.04.yml     # Ubuntu 24.04 specific variables
+    └── ubuntu_26.04.yml     # Ubuntu 26.04 specific variables
 ```
 
 ## 🏷️ Tags
@@ -628,7 +630,7 @@ Runs on every Pull Request in a two-tier gate pattern:
 4. **Ansible Lint** — checks Ansible best practices and role standards
 5. **Galaxy Metadata Validation** — verifies `meta/main.yml` schema and requirements (`ansible-meta-validate.yml`)
 6. **Security Scanning** — TruffleHog secret detection and Trivy IaC scanning (`ansible-security.yml`)
-7. **Molecule Integration Tests** — executes Molecule test matrix across Ubuntu 24.04, Debian 13, Debian 12, Rocky Linux 9 (`ansible-molecule.yml`)
+7. **Molecule Integration Tests** — executes Molecule test matrix across Ubuntu 26.04, Ubuntu 24.04, Debian 13, Debian 12, Rocky Linux 9 (`ansible-molecule.yml`)
 8. **Merge Check Gate** — single authoritative status check aggregating all results for branch protection
 
 ### Release & Publish Pipeline (`ansible-publish.yml@v3.0.1`)

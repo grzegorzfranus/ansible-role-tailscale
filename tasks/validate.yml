@@ -18,7 +18,7 @@
   ansible.builtin.assert:
     that:
       - ansible_facts['os_family'] in ['Debian', 'RedHat']
-    fail_msg: "Unsupported OS family '{{ ansible_facts['os_family'] }}'. Supported: Debian (Ubuntu 24.04, Debian 12/13), RedHat (EL9)."
+    fail_msg: "Unsupported OS family '{{ ansible_facts['os_family'] }}'. Supported: Debian (Ubuntu 24.04/26.04, Debian 12/13), RedHat (EL9)."
     success_msg: "OS family supported: {{ ansible_facts['os_family'] }}"
   when:
     - tailscale_validate_prerequisites | bool
@@ -27,11 +27,11 @@
   ansible.builtin.assert:
     that:
       - >-
-        (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_version'] == '24.04') or
+        (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_version'] in ['24.04', '26.04']) or
         (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] == '13') or
         (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] == '12') or
         (ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] == '9')
-    fail_msg: "Unsupported: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}. Supported: Ubuntu 24.04, Debian 12/13, EL9"
+    fail_msg: "Unsupported: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}. Supported: Ubuntu 24.04/26.04, Debian 12/13, EL9"
     success_msg: "Distribution supported: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
   when:
     - tailscale_validate_prerequisites | bool
