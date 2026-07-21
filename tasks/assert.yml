@@ -7,6 +7,53 @@
 # This file performs runtime-only checks (regex patterns, content validation, cross-field logic).
 # =============================================================================
 
+# -----------------------------------------------------------------------------
+# 1. Authentication Settings
+# -----------------------------------------------------------------------------
+
+- name: Tailscale | assert | Validate extra arguments content
+  ansible.builtin.assert:
+    that:
+      - tailscale_extra_args is match("^[a-zA-Z0-9=._\\-\\s/:\\[\\]]*$") or tailscale_extra_args == ""
+    fail_msg: "Invalid extra arguments content '{{ tailscale_extra_args }}'. Must contain only safe characters or be empty"
+    success_msg: "Extra arguments are valid"
+
+# -----------------------------------------------------------------------------
+# 2. Installation Settings
+# -----------------------------------------------------------------------------
+
+- name: Tailscale | assert | Validate track choice
+  ansible.builtin.assert:
+    that:
+      - tailscale_track in ['stable', 'unstable']
+    fail_msg: "Invalid tailscale_track '{{ tailscale_track }}'. Allowed: stable, unstable"
+    success_msg: "Track: {{ tailscale_track }}"
+
+- name: Tailscale | assert | Validate install method choice
+  ansible.builtin.assert:
+    that:
+      - tailscale_install_method in ['package', 'binary']
+    fail_msg: "Invalid tailscale_install_method '{{ tailscale_install_method }}'. Allowed: package, binary"
+    success_msg: "Install method: {{ tailscale_install_method }}"
+
+- name: Tailscale | assert | Validate apt key type choice
+  ansible.builtin.assert:
+    that:
+      - tailscale_apt_key_type in ['auto', 'legacy', 'keyring']
+    fail_msg: "Invalid tailscale_apt_key_type '{{ tailscale_apt_key_type }}'. Allowed: auto, legacy, keyring"
+    success_msg: "APT key type: {{ tailscale_apt_key_type }}"
+  when:
+    - ansible_facts['os_family'] == 'Debian'
+
+- name: Tailscale | assert | Validate prerequisites list
+  ansible.builtin.assert:
+    that:
+      - tailscale_prerequisites is defined
+      - tailscale_prerequisites is sequence
+      - tailscale_prerequisites | length > 0
+    fail_msg: "Prerequisites list is empty or undefined"
+    success_msg: "Prerequisites: {{ tailscale_prerequisites | length }} packages"
+
 - name: Tailscale | assert | Validate repository key URL
   ansible.builtin.assert:
     that:
@@ -35,12 +82,20 @@
     fail_msg: "Invalid repository list URL '{{ __tailscale_os_repo_list_url | default('undefined') }}'"
     success_msg: "Repository list URL is valid"
 
+# -----------------------------------------------------------------------------
+# 2.5. Service State (Lifecycle)
+# -----------------------------------------------------------------------------
+
 - name: Tailscale | assert | Validate service state choice
   ansible.builtin.assert:
     that:
       - tailscale_state in ['present', 'absent']
     fail_msg: "Invalid tailscale_state '{{ tailscale_state }}'. Allowed: present, absent"
     success_msg: "Service state: {{ tailscale_state }}"
+
+# -----------------------------------------------------------------------------
+# 3. Service Configuration
+# -----------------------------------------------------------------------------
 
 - name: Tailscale | assert | Validate systemctl start setting
   ansible.builtin.assert:
@@ -51,13 +106,6 @@
     fail_msg: "Invalid tailscale_systemctl_start '{{ tailscale_systemctl_start }}'. Allowed: 'auto', true, or false"
     success_msg: "Systemctl start: {{ tailscale_systemctl_start }}"
 
-- name: Tailscale | assert | Validate track choice
-  ansible.builtin.assert:
-    that:
-      - tailscale_track in ['stable', 'unstable']
-    fail_msg: "Invalid tailscale_track '{{ tailscale_track }}'. Allowed: stable, unstable"
-    success_msg: "Track: {{ tailscale_track }}"
-
 - name: Tailscale | assert | Validate service manager choice
   ansible.builtin.assert:
     that:
@@ -65,43 +113,16 @@
     fail_msg: "Invalid tailscale_service_manager '{{ tailscale_service_manager }}'. Allowed: auto, systemd"
     success_msg: "Service manager: {{ tailscale_service_manager }}"
 
-- name: Tailscale | assert | Validate install method choice
-  ansible.builtin.assert:
-    that:
-      - tailscale_install_method in ['package', 'binary']
-    fail_msg: "Invalid tailscale_install_method '{{ tailscale_install_method }}'. Allowed: package, binary"
-    success_msg: "Install method: {{ tailscale_install_method }}"
-
-- name: Tailscale | assert | Validate apt key type choice
-  ansible.builtin.assert:
-    that:
-      - tailscale_apt_key_type in ['auto', 'legacy', 'keyring']
-    fail_msg: "Invalid tailscale_apt_key_type '{{ tailscale_apt_key_type }}'. Allowed: auto, legacy, keyring"
-    success_msg: "APT key type: {{ tailscale_apt_key_type }}"
-  when:
-    - ansible_facts['os_family'] == 'Debian'
+# -----------------------------------------------------------------------------
+# 4. System Validation Settings
+# -----------------------------------------------------------------------------
 
 - name: Tailscale | assert | Validate connectivity timeout
   ansible.builtin.assert:
     that:
       - (tailscale_connectivity_timeout | int) > 0
     fail_msg: "tailscale_connectivity_timeout must be > 0"
-
-- name: Tailscale | assert | Validate extra arguments content
-  ansible.builtin.assert:
-    that:
-      - tailscale_extra_args is match("^[a-zA-Z0-9=._\\-\\s/:\\[\\]]*$") or tailscale_extra_args == ""
-    fail_msg: "Invalid extra arguments content '{{ tailscale_extra_args }}'. Must contain only safe characters or be empty"
-    success_msg: "Extra arguments are valid"
-
-- name: Tailscale | assert | Validate prerequisites list
-  ansible.builtin.assert:
-    that:
-      - tailscale_prerequisites is defined
-      - tailscale_prerequisites is sequence
-      - tailscale_prerequisites | length > 0
-    fail_msg: "Prerequisites list is empty or undefined"
-    success_msg: "Prerequisites: {{ tailscale_prerequisites | length }} packages"
+    success_msg: "Connectivity timeout: {{ tailscale_connectivity_timeout }}s"
 
 - name: Tailscale | assert | Validate validation flags are boolean
   ansible.builtin.assert:
@@ -111,6 +132,11 @@
       - tailscale_validate_prerequisites is boolean
       - tailscale_collect_system_info is boolean
     fail_msg: "Validation flags must be boolean"
+    success_msg: "Validation flags OK (system={{ tailscale_validate_system }}, connectivity={{ tailscale_validate_connectivity }}, prerequisites={{ tailscale_validate_prerequisites }}, collect_info={{ tailscale_collect_system_info }})"
+
+# -----------------------------------------------------------------------------
+# 5. Error Reporting Configuration
+# -----------------------------------------------------------------------------
 
 - name: Tailscale | assert | Validate error reporting flags are boolean
   ansible.builtin.assert:
@@ -120,6 +146,11 @@
       - tailscale_include_network_info is boolean
       - tailscale_include_package_info is boolean
     fail_msg: "Error reporting flags must be boolean"
+    success_msg: "Error reporting flags OK (enhanced={{ tailscale_enhanced_error_reporting }})"
+
+# -----------------------------------------------------------------------------
+# 6. Logging Configuration
+# -----------------------------------------------------------------------------
 
 - name: Tailscale | assert | Validate logging configuration basics
   ansible.builtin.assert:
@@ -136,6 +167,7 @@
       - tailscale_rsyslog_config_file is string
       - tailscale_rsyslog_config_file is match('^.+\.conf$')
     fail_msg: "Invalid logging configuration values"
+    success_msg: "Logging configuration OK (enabled={{ tailscale_enable_logging }}, dir={{ tailscale_log_dir }})"
 
 - name: Tailscale | assert | Validate logrotate options structure
   ansible.builtin.assert:
@@ -151,3 +183,4 @@
       - tailscale_logrotate_options.dateformat is string
       - (tailscale_logrotate_options.olddir == '') or (tailscale_logrotate_options.olddir is match('^/.+'))
     fail_msg: "Invalid logrotate options structure or values"
+    success_msg: "Logrotate options OK (enabled={{ tailscale_logrotate_options.enabled }}, frequency={{ tailscale_logrotate_options.frequency }})"
