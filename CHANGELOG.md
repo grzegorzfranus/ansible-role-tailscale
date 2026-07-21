@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0](https://github.com/grzegorzfranus/ansible-role-tailscale/compare/v1.8.5...v1.9.0) (2026-07-21)
+
+
+### Features
+
+* **ubuntu:** add support for ubuntu 26.04 ([#30](https://github.com/grzegorzfranus/ansible-role-tailscale/issues/30)) ([a5b484c](https://github.com/grzegorzfranus/ansible-role-tailscale/commit/a5b484cfcbceee0a23b267ff1a4387265e29d093))
+
 ## [1.8.5](https://github.com/grzegorzfranus/ansible-role-tailscale/compare/v1.8.4...v1.8.5) (2026-07-21)
 
 
