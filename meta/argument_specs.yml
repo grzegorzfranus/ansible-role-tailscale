@@ -13,6 +13,7 @@ argument_specs:
         description: "Tailscale authentication key. Generate from https://login.tailscale.com/admin/authkeys"
         type: str
         default: ""
+        no_log: true
 
       tailscale_extra_args:
         description: "Extra arguments to pass to 'tailscale up' command (e.g. '--advertise-exit-node')"
