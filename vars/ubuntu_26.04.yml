@@ -1,0 +1,16 @@
+---
+# =============================================================================
+# Ansible Role: Tailscale - Ubuntu 26.04 (Resolute) Variables
+# =============================================================================
+# OS-specific internal constants and computed values.
+# These are NOT user-overridable. All use double-underscore prefix per CoP §3.1.4.
+# =============================================================================
+
+__tailscale_os_repo_key_url: "https://pkgs.tailscale.com/stable/ubuntu/resolute.noarmor.gpg"
+__tailscale_os_repo_key_path: "/usr/share/keyrings/tailscale-archive-keyring.gpg"
+__tailscale_os_repo_list_url: "https://pkgs.tailscale.com/stable/ubuntu/resolute.tailscale-keyring.list"
+
+# OS-specific prerequisite packages (internal)
+__tailscale_os_prerequisites:
+  - apt-transport-https
+  - ca-certificates
