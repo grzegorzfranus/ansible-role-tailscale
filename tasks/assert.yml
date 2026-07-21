@@ -132,7 +132,11 @@
       - tailscale_validate_prerequisites is boolean
       - tailscale_collect_system_info is boolean
     fail_msg: "Validation flags must be boolean"
-    success_msg: "Validation flags OK (system={{ tailscale_validate_system }}, connectivity={{ tailscale_validate_connectivity }}, prerequisites={{ tailscale_validate_prerequisites }}, collect_info={{ tailscale_collect_system_info }})"
+    success_msg: >-
+      Validation flags OK (system={{ tailscale_validate_system }},
+      connectivity={{ tailscale_validate_connectivity }},
+      prerequisites={{ tailscale_validate_prerequisites }},
+      collect_info={{ tailscale_collect_system_info }})
 
 # -----------------------------------------------------------------------------
 # 5. Error Reporting Configuration
