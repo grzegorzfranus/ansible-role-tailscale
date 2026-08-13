@@ -56,7 +56,7 @@ jobs:
   ci:
     needs: [branch-name-lint, pr-title-lint]
     if: github.event.pull_request.draft == false
-    uses: grzegorzfranus/github-workflows/.github/workflows/ansible-ci.yml@v3.0.1
+    uses: grzegorzfranus/github-workflows/.github/workflows/ansible-ci.yml@main
     with:
       molecule-distros: '["ubuntu2604", "ubuntu2404", "debian13", "debian12", "rockylinux9"]'
 
