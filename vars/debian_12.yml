@@ -14,3 +14,4 @@ __tailscale_os_repo_list_url: "https://pkgs.tailscale.com/stable/debian/bookworm
 __tailscale_os_prerequisites:
   - apt-transport-https
   - ca-certificates
+  - python3-debian

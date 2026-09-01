@@ -14,6 +14,7 @@ __tailscale_os_repo_list_url: "https://pkgs.tailscale.com/stable/debian/trixie.t
 __tailscale_os_prerequisites:
   - apt-transport-https
   - ca-certificates
+  - python3-debian
 
 # Logging defaults for Debian 13 (rsyslog no longer creates syslog user)
 __tailscale_os_log_user: "root"

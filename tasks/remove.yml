@@ -15,11 +15,19 @@
   when:
     - ansible_facts['service_mgr'] == 'systemd'
 
-- name: Tailscale | remove | Remove apt repository (signed-by)
+- name: Tailscale | remove | Remove apt repository
   become: true
-  ansible.builtin.apt_repository:
-    repo: "deb [signed-by={{ __tailscale_os_repo_key_path }}] https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_facts['distribution'] | lower }} {{ __tailscale_version_codename }} main"
-    filename: tailscale
+  ansible.builtin.deb822_repository:
+    name: tailscale
+    state: absent
+  when:
+    - ansible_facts['os_family'] == 'Debian'
+
+# Justification: Role versions up to 1.9.1 wrote this file via apt_repository. Removing it guarantees a clean uninstall on upgraded hosts.
+- name: Tailscale | remove | Remove legacy apt sources list
+  become: true
+  ansible.builtin.file:
+    path: "/etc/apt/sources.list.d/tailscale.list"
     state: absent
   when:
     - ansible_facts['os_family'] == 'Debian'
