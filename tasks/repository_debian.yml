@@ -37,12 +37,29 @@
   register: __tailscale_key_download
   until: __tailscale_key_download is succeeded
 
+# Justification: Role versions up to 1.9.1 wrote this file via apt_repository. Removing it prevents a duplicate repository definition after an upgrade.
+- name: Tailscale | repository | Remove legacy apt sources list
+  become: true
+  ansible.builtin.file:
+    path: "/etc/apt/sources.list.d/tailscale.list"
+    state: absent
+  register: __tailscale_legacy_repo_removed
+
 - name: Tailscale | repository | Configure apt repository
   become: true
-  ansible.builtin.apt_repository:
-    repo: "deb [signed-by={{ __tailscale_os_repo_key_path }}] https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_facts['distribution'] | lower }} {{ __tailscale_version_codename }} main"
-    filename: tailscale
+  ansible.builtin.deb822_repository:
+    name: tailscale
+    types:
+      - deb
+    uris:
+      - "https://pkgs.tailscale.com/{{ tailscale_track }}/{{ ansible_facts['distribution'] | lower }}"
+    suites:
+      - "{{ __tailscale_version_codename }}"
+    components:
+      - main
+    signed_by: "{{ __tailscale_os_repo_key_path }}"
     state: present
+    enabled: true
   register: __tailscale_repo_added
 
 - name: Tailscale | repository | Update package cache

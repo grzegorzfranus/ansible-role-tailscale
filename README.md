@@ -407,7 +407,9 @@ This role **does not** support automatic rollback to a previous Tailscale versio
 
 ### Debian-family systems (Ubuntu, Debian)
 
-- Configured via `apt_repository` with `signed-by` pointing to the OS-specific keyring path.
+- Configured via `deb822_repository` using the deb822 `.sources` format, with `signed_by` pointing to the OS-specific keyring path.
+- Requires `python3-debian` on the managed node; it is installed automatically as an OS-specific prerequisite.
+- Any legacy `/etc/apt/sources.list.d/tailscale.list` written by role versions up to 1.9.1 is removed on both install and uninstall.
 - Uses the modern keyring method exclusively (no legacy `apt-key`).
 - Repository URLs and GPG key paths are managed internally via `include_vars`.
 
