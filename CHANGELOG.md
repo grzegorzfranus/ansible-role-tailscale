@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.5](https://github.com/grzegorzfranus/ansible-role-tailscale/compare/v1.9.4...v1.9.5) (2026-10-16)
+
+
+### CI/CD
+
+* **lint:** lint the workflows with util-workflow-lint and a zizmor policy for main ([#45](https://github.com/grzegorzfranus/ansible-role-tailscale/issues/45)) ([#46](https://github.com/grzegorzfranus/ansible-role-tailscale/issues/46)) ([fe10af0](https://github.com/grzegorzfranus/ansible-role-tailscale/commit/fe10af081d77bd8eea377330b2e1ac85c6317bee))
+
 ## [1.9.4](https://github.com/grzegorzfranus/ansible-role-tailscale/compare/v1.9.3...v1.9.4) (2026-10-16)
 
 
