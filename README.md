@@ -254,8 +254,8 @@ With this configuration, Tailscale logs will be directed to `/var/log/tailscale/
 | `tailscale_log_file` | Main Tailscale log file path | `"{{ tailscale_log_dir }}/tailscale.log"` |
 | `tailscale_log_file_permissions` | File permissions for log files (readable by system users) | `"0644"` |
 | `tailscale_log_dir_permissions` | Directory permissions for log directory | `"0755"` |
-| `tailscale_log_user` | Log file ownership user (overridden by OS-specific vars on EL9: `root`) | `"syslog"` |
-| `tailscale_log_group` | Log file ownership group (overridden by OS-specific vars on EL9: `root`) | `"adm"` |
+| `tailscale_log_user` | Log file ownership user (overridden by OS-specific vars on Debian 12, Debian 13 and EL9: `root`) | `"syslog"` |
+| `tailscale_log_group` | Log file ownership group (overridden by OS-specific vars on EL9: `root`; Debian 12 and Debian 13 use `adm`) | `"adm"` |
 | `tailscale_syslog_identifier` | Syslog program identifier for filtering | `"tailscaled"` |
 | `tailscale_rsyslog_config_file` | RSyslog configuration file name | `"49-tailscale.conf"` |
 
