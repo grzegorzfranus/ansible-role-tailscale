@@ -1,4 +1,18 @@
 ---
+# ==============================================================================
+# Workflow: CI
+# ==============================================================================
+# Purpose:
+#   Quality gate of this role. Validates the branch name and the pull request
+#   title, lints the workflow files (util-workflow-lint.yml), runs the shared
+#   Ansible CI (ansible-ci.yml: lint, metadata, security, SBOM, Molecule) and
+#   aggregates the results in the Merge Check Gate job required by the
+#   repository ruleset.
+#
+# Triggers:
+#   pull_request: opened, synchronize, reopened, ready_for_review on main
+# ==============================================================================
+
 name: CI
 
 run-name: "CI: ${{ github.event.pull_request.title || github.ref_name }} by @${{ github.actor }}"
@@ -15,6 +29,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   branch-name-lint:
@@ -53,6 +71,14 @@ jobs:
             exit 1
           fi
 
+  workflow-lint:
+    name: "🔍 Lint Workflows"
+    needs: [branch-name-lint, pr-title-lint]
+    if: github.event.pull_request.draft == false
+    uses: grzegorzfranus/github-workflows/.github/workflows/util-workflow-lint.yml@main
+    with:
+      paths: ""
+
   ci:
     needs: [branch-name-lint, pr-title-lint]
     if: github.event.pull_request.draft == false
@@ -63,7 +89,7 @@ jobs:
   merge-check:
     name: "Merge Check Gate"
     if: always() && github.event.pull_request.draft == false
-    needs: [branch-name-lint, pr-title-lint, ci]
+    needs: [branch-name-lint, pr-title-lint, workflow-lint, ci]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -73,13 +99,15 @@ jobs:
         env:
           BRANCH_NAME_LINT_RESULT: ${{ needs.branch-name-lint.result }}
           PR_TITLE_LINT_RESULT: ${{ needs.pr-title-lint.result }}
+          WORKFLOW_LINT_RESULT: ${{ needs.workflow-lint.result }}
           CI_RESULT: ${{ needs.ci.result }}
         run: |
           echo "Branch name lint: $BRANCH_NAME_LINT_RESULT"
           echo "PR title lint: $PR_TITLE_LINT_RESULT"
+          echo "Workflow lint: $WORKFLOW_LINT_RESULT"
           echo "CI result: $CI_RESULT"
           has_failures=0
-          for RESULT in "$BRANCH_NAME_LINT_RESULT" "$PR_TITLE_LINT_RESULT" "$CI_RESULT"; do
+          for RESULT in "$BRANCH_NAME_LINT_RESULT" "$PR_TITLE_LINT_RESULT" "$WORKFLOW_LINT_RESULT" "$CI_RESULT"; do
             if [[ "$RESULT" == "failure" || "$RESULT" == "cancelled" ]]; then
               has_failures=1
             fi
