@@ -15,3 +15,7 @@ __tailscale_os_prerequisites:
   - apt-transport-https
   - ca-certificates
   - python3-debian
+
+# Logging defaults for Debian 12 (rsyslog does not create the syslog user)
+__tailscale_os_log_user: "root"
+__tailscale_os_log_group: "adm"

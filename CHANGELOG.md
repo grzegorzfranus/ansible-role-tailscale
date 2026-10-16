@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.6](https://github.com/grzegorzfranus/ansible-role-tailscale/compare/v1.9.5...v1.9.6) (2026-10-16)
+
+
+### Bug Fixes
+
+* **logging:** own the log directory as root:adm on Debian 12 ([#50](https://github.com/grzegorzfranus/ansible-role-tailscale/issues/50)) ([#51](https://github.com/grzegorzfranus/ansible-role-tailscale/issues/51)) ([90030ad](https://github.com/grzegorzfranus/ansible-role-tailscale/commit/90030adf986a2d4c0a519d47688556375c2a79d0))
+
 ## [1.9.5](https://github.com/grzegorzfranus/ansible-role-tailscale/compare/v1.9.4...v1.9.5) (2026-10-16)
 
 
