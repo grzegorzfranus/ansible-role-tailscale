@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.9](https://github.com/grzegorzfranus/ansible-role-tailscale/compare/v1.9.8...v1.9.9) (2026-10-17)
+
+
+### CI/CD
+
+* **release:** delete the approval-required CI runs of release pull requests ([#57](https://github.com/grzegorzfranus/ansible-role-tailscale/issues/57)) ([#58](https://github.com/grzegorzfranus/ansible-role-tailscale/issues/58)) ([923a1e6](https://github.com/grzegorzfranus/ansible-role-tailscale/commit/923a1e6e3ef6311232af0f4d95e87cab4375e253))
+
 ## [1.9.8](https://github.com/grzegorzfranus/ansible-role-tailscale/compare/v1.9.7...v1.9.8) (2026-10-16)
 
 
