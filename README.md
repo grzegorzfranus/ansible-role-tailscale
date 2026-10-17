@@ -643,7 +643,7 @@ Runs on every pull request to `main` that is not a draft. A new push to the same
 Automated via [Release Please](https://github.com/googleapis/release-please). Release runs on `main` never overlap; a new run waits for the previous one.
 
 1. **Push to `main`** → Release Please creates or updates a Release PR with automated changelog generation
-2. **Release PR Validation** → runs yamllint, actionlint and the Galaxy metadata check on the release branch, then sets the `Merge Check Gate` status on the Release PR: `success`, or `failure` with a link to the run
+2. **Release PR Validation** → runs yamllint, actionlint and the Galaxy metadata check on the release branch, then sets the `Merge Check Gate` status on the Release PR: `success`, or `failure` with a link to the run. It also deletes the `CI` runs that GitHub holds for approval on the Release PR because Release Please opens it with `GITHUB_TOKEN`; unapproved, they would fail once the Release PR is merged
 3. **Merge Release PR** → creates Git version tag and GitHub Release automatically
 4. **Ansible Galaxy Publish** → publishes tagged release to Ansible Galaxy via `ansible-publish.yml` with exponential backoff retry logic
 
